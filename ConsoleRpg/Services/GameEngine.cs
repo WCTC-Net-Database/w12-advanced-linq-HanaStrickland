@@ -4,6 +4,7 @@ using ConsoleRpgEntities.Models.Attributes;
 using ConsoleRpgEntities.Models.Characters;
 using ConsoleRpgEntities.Models.Characters.Monsters;
 using ConsoleRpgEntities.Models.Equipments;
+using Microsoft.EntityFrameworkCore;
 
 namespace ConsoleRpg.Services;
 
@@ -42,6 +43,7 @@ public class GameEngine
             _outputManager.WriteLine("2. Search Inventory");
             _outputManager.WriteLine("3. Search Inventory by Type");
             _outputManager.WriteLine("4. Sort Items");
+            _outputManager.WriteLine("5. Choose Items");
             _outputManager.WriteLine("0. Quit");
 
             _outputManager.Display();
@@ -62,6 +64,9 @@ public class GameEngine
                 case "4":
                     SortItems();
                     break;
+                case "5":
+                    ChooseItems();
+                    break;
                 case "0":
                     _outputManager.WriteLine("Exiting game...", ConsoleColor.Red);
                     _outputManager.Display();
@@ -76,10 +81,14 @@ public class GameEngine
 
     public void SearchInventory()
     {
-        var items = _context.Items.Where(item => item.Name == "Elven Bow");
+    Console.WriteLine("Search by Name: ");
+    string input = Console.ReadLine();
+     
+    var items = _context.Items.Where(item => item.Name.Contains(input));    
+               
         foreach (var item in items)
         {
-            Console.WriteLine($"Your Item is {item.Name} of type {item.Type}");
+            Console.WriteLine($"Item: {item.Name}\tType:{item.Type}");
         }
     }
 
@@ -146,6 +155,46 @@ public class GameEngine
         {
             Console.WriteLine($"\n{item.Name}\t{item.Defense}");
         }
+    }
+
+    public void ChooseItems()
+    {
+        Console.WriteLine("Let's Choose Equipment. What is your name?");
+        string nameInput = Console.ReadLine();
+
+        Console.WriteLine("Let's choose a Weapon!");
+        Console.WriteLine("What item would you like as your weapon?");
+
+        bool noWeapon = true;
+        int weaponId;
+        
+        while (noWeapon)
+        {
+            // TODO: Check if there's already a weapon
+            // TODO: Ask if they'd like to keep the weapon or swap it out
+            // TODO: Ask for input
+            // TODO: Update Weapon in DB
+
+            //var query = _context.Players
+            //    .Join(_context.Equipments,
+            //    p => p.EquipmentId,
+            //    e => e.Id,
+            //    (p, e) => new { Players = p, Equipments = e })
+            //    .Where(playerWithEquipment => playerWithEquipment.Players.Name == nameInput)
+            //    .ToList();
+
+
+            //foreach (var item in query)
+            //{
+            //    Console.WriteLine($"Name:{query.FirstOrDefault().Players.Name}\tWeaponId:{query.FirstOrDefault().Equipments.WeaponId}");   
+            //}
+
+          
+            noWeapon = false;
+        }
+
+        Console.WriteLine("Let's choose Armor!");
+        Console.WriteLine("What item would you like as your armor?");
     }
     private void AttackCharacter()
     {
