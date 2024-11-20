@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using ConsoleRpgEntities.Models.Characters;
 
-namespace ConsoleRpgEntities.Models.Equipments;
+namespace ConsoleRpgEntities.Models;
 
 
 // TODO note this model has been updated from the previous version so a migration will be needed

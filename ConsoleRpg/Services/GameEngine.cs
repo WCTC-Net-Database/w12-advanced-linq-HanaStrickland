@@ -3,7 +3,7 @@ using ConsoleRpgEntities.Data;
 using ConsoleRpgEntities.Models.Attributes;
 using ConsoleRpgEntities.Models.Characters;
 using ConsoleRpgEntities.Models.Characters.Monsters;
-using ConsoleRpgEntities.Models.Equipments;
+using ConsoleRpgEntities.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ConsoleRpg.Services;

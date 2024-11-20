@@ -1,7 +1,7 @@
 ﻿using ConsoleRpgEntities.Models.Abilities.PlayerAbilities;
 using ConsoleRpgEntities.Models.Attributes;
 using System.ComponentModel.DataAnnotations;
-using ConsoleRpgEntities.Models.Equipments;
+using ConsoleRpgEntities.Models;
 
 namespace ConsoleRpgEntities.Models.Characters
 {

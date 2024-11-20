@@ -1,7 +1,7 @@
 ﻿using ConsoleRpgEntities.Models.Abilities.PlayerAbilities;
 using ConsoleRpgEntities.Models.Characters;
 using ConsoleRpgEntities.Models.Characters.Monsters;
-using ConsoleRpgEntities.Models.Equipments;
+using ConsoleRpgEntities.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ConsoleRpgEntities.Data
@@ -42,6 +42,8 @@ namespace ConsoleRpgEntities.Data
             .WithOne(e=>e.Player)
             .HasForeignKey("PlayerId")
             .IsRequired(false);
+
+            base.OnModelCreating(modelBuilder);
         }
 
     }
