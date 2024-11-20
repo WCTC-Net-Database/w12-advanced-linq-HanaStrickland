@@ -2,6 +2,7 @@
 using ConsoleRpgEntities.Models.Attributes;
 using System.ComponentModel.DataAnnotations;
 using ConsoleRpgEntities.Models;
+using ConsoleRpgEntities.Models.Characters.Monsters;
 
 namespace ConsoleRpgEntities.Models.Characters
 {
@@ -23,6 +24,21 @@ namespace ConsoleRpgEntities.Models.Characters
         {
             // Player-specific attack logic
 
+            Item attackItem = Items.Where(i=>i.Attack != null).FirstOrDefault(); // only retrive item with Attack value
+
+            if (attackItem != null)
+            {
+                Console.WriteLine($"{Name} attacks {target.Name} with a {attackItem.Name}");
+
+                if (this is Player && target is Goblin goblin)
+                {
+                    goblin.Health -= attackItem.Attack;
+                }   
+            }
+            else
+            {
+                Console.WriteLine("You have no weapons for attacking");
+            }
 
         }
 
