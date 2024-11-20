@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using ConsoleRpgEntities.Models.Characters;
 
 namespace ConsoleRpgEntities.Models.Equipments;
 
@@ -16,4 +17,7 @@ public class Item
     public decimal Weight { get; set; }
 
     public int Value { get; set; }
+
+    public virtual Player Player {get;set;}
+    public virtual int? PlayerId {get;set;}
 }

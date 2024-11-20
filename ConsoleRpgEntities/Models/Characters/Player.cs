@@ -16,16 +16,13 @@ namespace ConsoleRpgEntities.Models.Characters
         public int? EquipmentId { get; set; }
 
         // Navigation properties
-        public virtual Inventory Inventory { get; set; }
-        public virtual Equipment Equipment { get; set; }
+        public virtual ICollection<Item> Items { get; set; }
         public virtual ICollection<Ability> Abilities { get; set; }
 
         public void Attack(ITargetable target)
         {
             // Player-specific attack logic
-            Console.WriteLine($"{Name} attacks {target.Name} with a {Equipment.Weapon.Name} dealing {Equipment.Weapon.Attack} damage!");
-            target.Health -= Equipment.Weapon.Attack;
-            System.Console.WriteLine($"{target.Name} has {target.Health} health remaining.");
+
 
         }
 
