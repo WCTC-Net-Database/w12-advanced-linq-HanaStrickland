@@ -159,49 +159,107 @@ public class GameEngine
 
     public void ChooseItems()
     {
-        Console.WriteLine("Let's Choose Equipment. What is your name?");
-        string nameInput = Console.ReadLine();
+        AddItem("Weapon");
+        AddItem("Armor");
 
-        Console.WriteLine("Let's choose a Weapon!");
-        Console.WriteLine("What item would you like as your weapon?");
-
-        bool noWeapon = true;
-        int weaponId;
-        
-        while (noWeapon)
-        {
-            // TODO: Check if there's already a weapon
-            // TODO: Ask if they'd like to keep the weapon or swap it out
-            // TODO: Ask for input
-            // TODO: Update Weapon in DB
-
-            //var query = _context.Players
-            //    .Join(_context.Equipments,
-            //    p => p.EquipmentId,
-            //    e => e.Id,
-            //    (p, e) => new { Players = p, Equipments = e })
-            //    .Where(playerWithEquipment => playerWithEquipment.Players.Name == nameInput)
-            //    .ToList();
-
-
-            //foreach (var item in query)
-            //{
-            //    Console.WriteLine($"Name:{query.FirstOrDefault().Players.Name}\tWeaponId:{query.FirstOrDefault().Equipments.WeaponId}");   
-            //}
-
-          
-            noWeapon = false;
-        }
-
-        Console.WriteLine("Let's choose Armor!");
-        Console.WriteLine("What item would you like as your armor?");
     }
+
+    public void AddItem(string itemType)
+    {
+        bool addItem;
+
+        var query = from p in _context.Players
+            join i in _context.Items on p.Id equals i.PlayerId into itemGroup
+            from i in itemGroup.DefaultIfEmpty()
+            select new { player = p, item = i };
+        
+        var itemLookup = from q in query
+                   where q.item.Type == itemType && q.item.PlayerId == 1
+                   select q;
+
+        
+        if (!itemLookup.Any()) // Check if itemLookup is empty
+        {
+            Console.WriteLine($"You have no items of type {itemType}");
+            addItem = true;
+        }
+        else
+        {
+            Console.WriteLine($"Do you want to add another item of type {itemType}? (Y/N)");
+            var input = Console.ReadLine().ToUpper()[0];
+
+            if (input == 'Y')
+            {
+                Console.WriteLine($"You've chosen to add an additional {itemType}.");
+                addItem = true;
+            }
+            else
+            {
+                Console.WriteLine($"You've chosen not to add an additional {itemType}.");
+                addItem = false;
+            }
+
+        }     
+
+        if (addItem)
+        {
+            Console.WriteLine($"Let's add an item of type {itemType}");
+            Console.WriteLine($"Name the {itemType} you'd like to add: ");
+            var itemToAdd = Console.ReadLine();
+
+            var finditem = from i in _context.Items
+                   where i.Type == itemType && i.Name == itemToAdd
+                   select i;
+            
+            var itemHasNoPlayer = from f in finditem
+                    where f.PlayerId == null
+                    select f;
+                    
+            bool itemNotAdded = true;
+
+            while (itemNotAdded)
+            {
+                // Check the item exists
+                if (finditem.Any())
+                {
+                    System.Console.WriteLine($"This is a valid {itemType} name.");
+                    if (itemHasNoPlayer.Any())
+                    {
+                        System.Console.WriteLine($"You can add this {itemType}.");
+                        
+                        var itemHasNoPlayerFirst = itemHasNoPlayer.FirstOrDefault();
+                        itemHasNoPlayerFirst.PlayerId = 1;
+
+                        UpdateItem(itemHasNoPlayerFirst);
+                        itemNotAdded = false;
+                    }
+                    else
+                    {
+                        System.Console.WriteLine($"You already have this {itemType}.");
+                        break;
+                    }
+
+                }
+                else
+                {
+                    System.Console.WriteLine($"That is not a valid {itemType} name.");
+                    break;
+                }
+            }
+        }
+    }
+    
     private void AttackCharacter()
     {
         if (_goblin is ITargetable targetableGoblin)
         {
-            _player.Attack(targetableGoblin);
+            int itemIdForAttack = _player.Attack(targetableGoblin);
             _player.UseAbility(_player.Abilities.First(), targetableGoblin);
+
+            var itemForAttack = getItem(itemIdForAttack);
+            itemForAttack.PlayerId = null;
+            UpdateItem(itemForAttack);
+
         }
     }
 
@@ -221,6 +279,24 @@ public class GameEngine
     private void LoadMonsters()
     {
         _goblin = _context.Monsters.OfType<Goblin>().FirstOrDefault();
+    }
+
+    public void UpdateItem(Item item)
+    {
+        _context.Items.Update(item);
+        _context.SaveChanges();
+    }
+
+    public void DeleteItem(Item item)
+    {
+        _context.Items.Remove(item);
+        _context.SaveChanges();
+    }
+
+    public Item getItem(int id)
+    {
+        var retrievedItem = _context.Items.Where(i=> i.Id == id).FirstOrDefault();
+        return retrievedItem;
     }
 
 }

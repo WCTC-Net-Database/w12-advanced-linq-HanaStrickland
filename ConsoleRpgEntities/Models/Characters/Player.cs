@@ -13,18 +13,15 @@ namespace ConsoleRpgEntities.Models.Characters
         public int Experience { get; set; }
         public int Health { get; set; }
 
-        // Foreign key
-        public int? EquipmentId { get; set; }
-
         // Navigation properties
         public virtual ICollection<Item> Items { get; set; }
         public virtual ICollection<Ability> Abilities { get; set; }
 
-        public void Attack(ITargetable target)
+        public int Attack(ITargetable target)
         {
             // Player-specific attack logic
 
-            Item attackItem = Items.Where(i=>i.Attack != null).FirstOrDefault(); // only retrive item with Attack value
+            Item attackItem = Items.Where(i=>i.Type == "Weapon").FirstOrDefault();
 
             if (attackItem != null)
             {
@@ -33,11 +30,17 @@ namespace ConsoleRpgEntities.Models.Characters
                 if (this is Player && target is Goblin goblin)
                 {
                     goblin.Health -= attackItem.Attack;
-                }   
+                    return attackItem.Id;
+                } 
+                else
+                {
+                    return 0;
+                }
             }
             else
             {
                 Console.WriteLine("You have no weapons for attacking");
+                return 0;
             }
 
         }
