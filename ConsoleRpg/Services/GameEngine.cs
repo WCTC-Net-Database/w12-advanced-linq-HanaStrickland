@@ -256,9 +256,16 @@ public class GameEngine
             int itemIdForAttack = _player.Attack(targetableGoblin);
             _player.UseAbility(_player.Abilities.First(), targetableGoblin);
 
-            var itemForAttack = getItem(itemIdForAttack);
-            itemForAttack.PlayerId = null;
-            UpdateItem(itemForAttack);
+            if (itemIdForAttack == 0)
+            {
+                Console.WriteLine("There was no attack, so no items to remove.");
+            }
+            else
+            {
+                var itemForAttack = getItem(itemIdForAttack);
+                itemForAttack.PlayerId = null;
+                UpdateItem(itemForAttack);
+            }
 
         }
     }
