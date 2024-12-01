@@ -22,7 +22,9 @@ namespace ConsoleRpgEntities.Data
             // Configure TPH for Character hierarchy
             modelBuilder.Entity<Monster>()
                 .HasDiscriminator<string>(m=> m.MonsterType)
-                .HasValue<Goblin>("Goblin");
+                .HasValue<Goblin>("Goblin")
+                .HasValue<Vampire>("Vampire")
+                .HasValue<Wizard>("Wizard");
 
             // Configure TPH for Ability hierarchy
             modelBuilder.Entity<Ability>()
