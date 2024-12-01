@@ -44,6 +44,7 @@ public class GameEngine
             _outputManager.WriteLine("3. Search Inventory by Type");
             _outputManager.WriteLine("4. Sort Items");
             _outputManager.WriteLine("5. Choose Items");
+            _outputManager.WriteLine("6. Create a New Player");
             _outputManager.WriteLine("0. Quit");
 
             _outputManager.Display();
@@ -66,6 +67,9 @@ public class GameEngine
                     break;
                 case "5":
                     ChooseItems();
+                    break;
+                case "6":
+                    CreateNewPlayer();
                     break;
                 case "0":
                     _outputManager.WriteLine("Exiting game...", ConsoleColor.Red);
@@ -159,12 +163,23 @@ public class GameEngine
 
     public void ChooseItems()
     {
-        AddItem("Weapon");
-        AddItem("Armor");
+        Console.WriteLine("Select a Player Id: ");
+        int playerIdSelection = Convert.ToInt32(Console.ReadLine());
 
+        var playerSelection = _context.Players.Where(p => p.Id == playerIdSelection).FirstOrDefault();
+
+        if (playerSelection == null)
+        {
+            Console.WriteLine("That player does not exist");
+        }
+        else
+        {
+            AddItem("Weapon", playerIdSelection);
+            AddItem("Armor", playerIdSelection);
+        }
     }
 
-    public void AddItem(string itemType)
+    public void AddItem(string itemType , int playerId)
     {
         bool addItem;
 
@@ -174,7 +189,7 @@ public class GameEngine
             select new { player = p, item = i };
         
         var itemLookup = from q in query
-                   where q.item.Type == itemType && q.item.PlayerId == 1
+                   where q.item.Type == itemType && q.item.PlayerId == playerId
                    select q;
 
         
@@ -228,7 +243,7 @@ public class GameEngine
                         System.Console.WriteLine($"You can add this {itemType}.");
                         
                         var itemHasNoPlayerFirst = itemHasNoPlayer.FirstOrDefault();
-                        itemHasNoPlayerFirst.PlayerId = 1;
+                        itemHasNoPlayerFirst.PlayerId = playerId;
 
                         UpdateItem(itemHasNoPlayerFirst);
                         itemNotAdded = false;
@@ -304,6 +319,34 @@ public class GameEngine
     {
         var retrievedItem = _context.Items.Where(i=> i.Id == id).FirstOrDefault();
         return retrievedItem;
+    }
+
+    public void CreateNewPlayer()
+    {
+        Console.WriteLine("Enter player NAME: ");
+        string newPlayerName = Console.ReadLine();
+
+        var newPlayer = new Player
+                {
+                    Name = newPlayerName,
+                    Experience = 0,
+                    Health = 100
+                };
+
+        AddPlayer(newPlayer);
+        
+    }
+
+    public void UpdatePlayer(Player player)
+    {
+        _context.Players.Update(player);
+        _context.SaveChanges();
+    }
+
+    public void AddPlayer(Player player)
+    {
+        _context.Players.Add(player);
+        _context.SaveChanges();
     }
 
 }
