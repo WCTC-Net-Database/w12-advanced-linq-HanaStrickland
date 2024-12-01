@@ -214,54 +214,55 @@ public class GameEngine
                 addItem = false;
             }
 
-        }     
+        }
 
-        if (addItem)
+        bool itemNotAdded = true; 
+
+        do 
         {
-            Console.WriteLine($"Let's add an item of type {itemType}");
-            Console.WriteLine($"Name the {itemType} you'd like to add: ");
-            var itemToAdd = Console.ReadLine();
-
-            var finditem = from i in _context.Items
-                   where i.Type == itemType && i.Name == itemToAdd
-                   select i;
-            
-            var itemHasNoPlayer = from f in finditem
-                    where f.PlayerId == null
-                    select f;
-                    
-            bool itemNotAdded = true;
-
-            while (itemNotAdded)
+            if (addItem)
             {
-                // Check the item exists
-                if (finditem.Any())
-                {
-                    System.Console.WriteLine($"This is a valid {itemType} name.");
-                    if (itemHasNoPlayer.Any())
-                    {
-                        System.Console.WriteLine($"You can add this {itemType}.");
-                        
-                        var itemHasNoPlayerFirst = itemHasNoPlayer.FirstOrDefault();
-                        itemHasNoPlayerFirst.PlayerId = playerId;
+                Console.WriteLine($"Let's add an item of type {itemType}");
+                Console.WriteLine($"Name the {itemType} you'd like to add: ");
+                var itemToAdd = Console.ReadLine();
 
-                        UpdateItem(itemHasNoPlayerFirst);
-                        itemNotAdded = false;
+                var finditem = from i in _context.Items
+                    where i.Type == itemType && i.Name == itemToAdd
+                    select i;
+                
+                var itemHasNoPlayer = from f in finditem
+                        where f.PlayerId == null
+                        select f;        
+
+                
+                    // Check the item exists
+                    if (finditem.Any())
+                    {
+                        System.Console.WriteLine($"This is a valid {itemType} name.");
+                        if (itemHasNoPlayer.Any())
+                        {
+                            System.Console.WriteLine($"You can add this {itemType}.");
+                            
+                            var itemHasNoPlayerFirst = itemHasNoPlayer.FirstOrDefault();
+                            itemHasNoPlayerFirst.PlayerId = playerId;
+
+                            UpdateItem(itemHasNoPlayerFirst);
+                            itemNotAdded = false;
+                        }
+                        else
+                        {
+                            System.Console.WriteLine($"You already have this {itemType}.");
+                            itemNotAdded = true;
+                        }
+
                     }
                     else
                     {
-                        System.Console.WriteLine($"You already have this {itemType}.");
-                        break;
+                        System.Console.WriteLine($"That is not a valid {itemType} name.");
+                        itemNotAdded = true;
                     }
-
-                }
-                else
-                {
-                    System.Console.WriteLine($"That is not a valid {itemType} name.");
-                    break;
-                }
-            }
-        }
+            } 
+        } while (itemNotAdded);
     }
     
     private void AttackCharacter()
