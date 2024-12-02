@@ -216,7 +216,16 @@ public class GameEngine
 
         }
 
-        bool itemNotAdded = true; 
+        bool itemNotAdded;
+        if (addItem)
+        {
+            itemNotAdded = true;
+        }
+        else
+        {
+            itemNotAdded = false;
+        }
+    
 
         do 
         {
@@ -227,38 +236,51 @@ public class GameEngine
                 var itemToAdd = Console.ReadLine();
 
                 var finditem = from i in _context.Items
-                    where i.Type == itemType && i.Name == itemToAdd
+                    where i.Name == itemToAdd
                     select i;
+
+                var itemsOfItemType = from f in finditem
+                        where f.Type == itemType
+                        select f;
                 
-                var itemHasNoPlayer = from f in finditem
+                var itemHasNoPlayer = from f in itemsOfItemType
                         where f.PlayerId == null
-                        select f;        
+                        select f;      
 
                 
                     // Check the item exists
                     if (finditem.Any())
                     {
-                        System.Console.WriteLine($"This is a valid {itemType} name.");
-                        if (itemHasNoPlayer.Any())
-                        {
-                            System.Console.WriteLine($"You can add this {itemType}.");
-                            
-                            var itemHasNoPlayerFirst = itemHasNoPlayer.FirstOrDefault();
-                            itemHasNoPlayerFirst.PlayerId = playerId;
+                        // Check if item is the correct type
+                        if (itemsOfItemType.Any())
+                            {
+                                // Check it item is already taken
+                                if (itemHasNoPlayer.Any())
+                                {
+                                    System.Console.WriteLine($"The {itemType} {itemToAdd} is available.");
+                                    
+                                    var itemHasNoPlayerFirst = itemHasNoPlayer.FirstOrDefault();
+                                    itemHasNoPlayerFirst.PlayerId = playerId;
 
-                            UpdateItem(itemHasNoPlayerFirst);
-                            itemNotAdded = false;
+                                    UpdateItem(itemHasNoPlayerFirst);
+                                    itemNotAdded = false;
+                                }
+                                else
+                                {
+                                    System.Console.WriteLine($"{itemToAdd} is already taken.");
+                                    itemNotAdded = true;
+                                }
                         }
                         else
                         {
-                            System.Console.WriteLine($"You already have this {itemType}.");
+                            System.Console.WriteLine($"The item {itemToAdd} is not a valid {itemType}");
                             itemNotAdded = true;
                         }
 
                     }
                     else
                     {
-                        System.Console.WriteLine($"That is not a valid {itemType} name.");
+                        System.Console.WriteLine($"That is not a valid item name.");
                         itemNotAdded = true;
                     }
             } 
