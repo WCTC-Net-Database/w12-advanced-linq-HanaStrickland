@@ -216,20 +216,10 @@ public class GameEngine
 
         }
 
-        bool itemNotAdded;
+    bool itemNotAdded = true;
+    while (itemNotAdded)
+    {
         if (addItem)
-        {
-            itemNotAdded = true;
-        }
-        else
-        {
-            itemNotAdded = false;
-        }
-    
-
-        do 
-        {
-            if (addItem)
             {
                 Console.WriteLine($"Let's add an item of type {itemType}");
                 Console.WriteLine($"Name the {itemType} you'd like to add: ");
@@ -284,7 +274,12 @@ public class GameEngine
                         itemNotAdded = true;
                     }
             } 
-        } while (itemNotAdded);
+        else
+        {
+            itemNotAdded = false;
+        }
+    }
+
     }
     
     private void AttackCharacter()
