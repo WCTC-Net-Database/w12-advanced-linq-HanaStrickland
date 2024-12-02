@@ -40,8 +40,8 @@ public class GameEngine
         {
             _outputManager.WriteLine("Choose an action:", ConsoleColor.Cyan);
             _outputManager.WriteLine("1. Attack");
-            _outputManager.WriteLine("2. Search Inventory");
-            _outputManager.WriteLine("3. Search Inventory by Type");
+            _outputManager.WriteLine("2. Display All Players");
+            _outputManager.WriteLine("3. Search Players");
             _outputManager.WriteLine("4. Sort Items");
             _outputManager.WriteLine("5. Choose Items");
             _outputManager.WriteLine("6. Create a New Player");
@@ -58,10 +58,10 @@ public class GameEngine
                     AttackCharacter();
                     break;
                 case "2":
-                    SearchInventory();
+                    DisplayAllPlayers();
                     break;
                 case "3":
-                    ListItemsByType();
+                    SearchPlayers();
                     break;
                 case "4":
                     SortItems();
@@ -88,6 +88,28 @@ public class GameEngine
             }
         }
     }
+
+    public void DisplayAllPlayers()
+    {
+        var players = _context.Players;
+
+        foreach (var player in players)
+        {
+            System.Console.WriteLine($"Id: {player.Id}\tName: {player.Name}\tExperience: {player.Experience}\tHealth: {player.Health}");
+        }
+    }
+
+    public void SearchPlayers()
+    {
+        System.Console.WriteLine("Enter player name or ID");
+
+        string input = Console.ReadLine();
+        Player player = FindPlayer(input);
+
+        System.Console.WriteLine($"Id: {player.Id}\tName: {player.Name}\tExperience: {player.Experience}\tHealth: {player.Health}");
+
+    }
+
 
     public void SearchInventory()
     {
@@ -176,7 +198,6 @@ public class GameEngine
 
         if (playerSelection == null)
         {
-            Console.WriteLine("That player does not exist");
         }
         else
         {
