@@ -101,13 +101,38 @@ public class GameEngine
 
     public void SearchPlayers()
     {
-        System.Console.WriteLine("Enter player name or ID");
+        var players = _context.Players;
 
-        string input = Console.ReadLine();
-        Player player = FindPlayer(input);
+        bool searchDone = false;
 
-        System.Console.WriteLine($"Id: {player.Id}\tName: {player.Name}\tExperience: {player.Experience}\tHealth: {player.Health}");
+        while (!searchDone)
+        {
+            // check if there are any players in the table
 
+            if (players.Any())
+            {
+               System.Console.WriteLine("Enter player name or ID");
+
+                string input = Console.ReadLine();
+                Player player = FindPlayer(input);
+
+                if (player != null)
+                {
+                    System.Console.WriteLine($"Id: {player.Id}\tName: {player.Name}\tExperience: {player.Experience}\tHealth: {player.Health}");
+                    searchDone = true;
+                }
+                else
+                {
+                    System.Console.WriteLine("The player does not exist");
+                }
+
+            }
+            else
+            {
+                System.Console.WriteLine("There are no players");
+                searchDone = true;
+            }
+        }
     }
 
 
@@ -392,7 +417,7 @@ public class GameEngine
 
             if (cheatingPlayer != null)
             {
-                System.Console.WriteLine($"You've chosen to cheat with {cheatingPlayer.Name}");
+                System.Console.WriteLine($"You've chosen to cheat using player {cheatingPlayer.Name}");
                 invalidPlayer = false;
                 return cheatingPlayer;
             } 
@@ -468,7 +493,9 @@ public class GameEngine
         else
         {
             System.Console.WriteLine("Let's Search by Player Name");
-            Player player = _context.Players.Where(p => p.Name == search).FirstOrDefault();
+            Player player = _context.Players
+                .ToList()
+                .FirstOrDefault(p => p.Name.Equals(search, StringComparison.Ordinal));
             return player;
 
         }
