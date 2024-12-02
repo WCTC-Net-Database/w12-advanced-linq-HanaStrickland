@@ -45,6 +45,7 @@ public class GameEngine
             _outputManager.WriteLine("4. Sort Items");
             _outputManager.WriteLine("5. Choose Items");
             _outputManager.WriteLine("6. Create a New Player");
+            _outputManager.WriteLine("7. Cheat and Increase Stats");
             _outputManager.WriteLine("0. Quit");
 
             _outputManager.Display();
@@ -71,6 +72,11 @@ public class GameEngine
                 case "6":
                     CreateNewPlayer();
                     break;
+                case "7":
+                {
+                    CheatMode();
+                    break;
+                }
                 case "0":
                     _outputManager.WriteLine("Exiting game...", ConsoleColor.Red);
                     _outputManager.Display();
@@ -258,20 +264,17 @@ public class GameEngine
                                 else
                                 {
                                     System.Console.WriteLine($"{itemToAdd} is already taken.");
-                                    itemNotAdded = true;
                                 }
                         }
                         else
                         {
                             System.Console.WriteLine($"The item {itemToAdd} is not a valid {itemType}");
-                            itemNotAdded = true;
                         }
 
                     }
                     else
                     {
                         System.Console.WriteLine($"That is not a valid item name.");
-                        itemNotAdded = true;
                     }
             } 
         else
@@ -355,6 +358,70 @@ public class GameEngine
         
     }
 
+    public Player GetCheatingPlayer()
+    {
+        bool invalidPlayer = true;
+
+        while (invalidPlayer)
+        {
+            System.Console.WriteLine("Select a player by ID or Name: ");
+            string playerSearchInput = Console.ReadLine();
+
+            Player cheatingPlayer = FindPlayer(playerSearchInput);
+
+            if (cheatingPlayer != null)
+            {
+                System.Console.WriteLine($"You've chosen to cheat with {cheatingPlayer.Name}");
+                invalidPlayer = false;
+                return cheatingPlayer;
+            } 
+            else
+            {
+                System.Console.WriteLine("That Player does not exist.");
+            }
+        }
+
+        return null;
+    }
+
+    public void CheatMode()
+    {
+
+        Player cheatingPlayer = GetCheatingPlayer();
+
+        Console.WriteLine("How would you like to cheat?:\n    1. Increase Experience\n    2. Increase Health");
+
+        string cheatInput = Console.ReadLine();
+
+        switch (cheatInput)
+        {
+            case "1":
+                Console.WriteLine("Let's increase your experience points");
+                IncreasePlayerExperiencePoints(cheatingPlayer);
+                break;
+            case "2":
+                Console.WriteLine("Let's increase your health points");
+                IncreasePlayerHealthPoints(cheatingPlayer);
+                break;
+            default:
+                Console.WriteLine("Invalid Selection");
+                break;
+        }
+
+    }
+
+    public void IncreasePlayerExperiencePoints(Player player)
+    {
+        player.Experience += 5;
+        UpdatePlayer(player);
+    }
+
+    public void IncreasePlayerHealthPoints(Player player)
+    {
+        player.Health += 5;
+        UpdatePlayer(player);
+    }
+
     public void UpdatePlayer(Player player)
     {
         _context.Players.Update(player);
@@ -365,6 +432,25 @@ public class GameEngine
     {
         _context.Players.Add(player);
         _context.SaveChanges();
+    }
+
+    public Player FindPlayer(string search)
+    {
+        // If user entered a number, assume it's the ID,
+        // Else assume it's the Name
+        if (int.TryParse(search, out int result))
+        {
+            System.Console.WriteLine("Let's Search by Player ID");
+            Player player = _context.Players.Where(p => p.Id == result).FirstOrDefault();
+            return player;
+        }
+        else
+        {
+            System.Console.WriteLine("Let's Search by Player Name");
+            Player player = _context.Players.Where(p => p.Name == search).FirstOrDefault();
+            return player;
+
+        }
     }
 
 }
