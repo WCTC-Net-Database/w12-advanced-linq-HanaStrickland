@@ -8,9 +8,10 @@ namespace ConsoleRpgEntities.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
+            migrationBuilder.RenameColumn(
                 name: "Distance",
-                table: "Abilities");
+                table: "Abilities",
+                newName: "Metric");
 
             migrationBuilder.AlterColumn<int>(
                 name: "Damage",
@@ -21,20 +22,14 @@ namespace ConsoleRpgEntities.Migrations
                 oldClrType: typeof(int),
                 oldType: "int",
                 oldNullable: true);
-
-            migrationBuilder.AddColumn<int>(
-                name: "Metric",
-                table: "Abilities",
-                type: "int",
-                nullable: true,
-                defaultValue: 0);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
+            migrationBuilder.RenameColumn(
                 name: "Metric",
-                table: "Abilities");
+                table: "Abilities",
+                newName: "Distance");
 
             migrationBuilder.AlterColumn<int>(
                 name: "Damage",
@@ -43,12 +38,6 @@ namespace ConsoleRpgEntities.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "int");
-
-            migrationBuilder.AddColumn<int>(
-                name: "Distance",
-                table: "Abilities",
-                type: "int",
-                nullable: true);
         }
     }
 }

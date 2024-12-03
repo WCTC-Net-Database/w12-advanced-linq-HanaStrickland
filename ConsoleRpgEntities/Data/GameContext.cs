@@ -30,7 +30,7 @@ namespace ConsoleRpgEntities.Data
             modelBuilder.Entity<Ability>()
                 .HasDiscriminator<string>(pa=>pa.AbilityType)
                 .HasValue<ShoveAbility>("ShoveAbility")
-                .HasValue<StabAbility>("Stab Ability")
+                .HasValue<StabAbility>("StabAbility")
                 .HasValue<LiftAbility>("LiftAbility");
 
             // Configure many-to-many relationship

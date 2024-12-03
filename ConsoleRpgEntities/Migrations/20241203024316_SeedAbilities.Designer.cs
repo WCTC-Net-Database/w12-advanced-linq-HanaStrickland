@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ConsoleRpgEntities.Migrations
 {
     [DbContext(typeof(GameContext))]
-    [Migration("20241202031442_AddMoreAbilities")]
-    partial class AddMoreAbilities
+    [Migration("20241203024316_SeedAbilities")]
+    partial class SeedAbilities
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -58,7 +58,7 @@ namespace ConsoleRpgEntities.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Metric")
+                    b.Property<int?>("Metric")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -180,7 +180,7 @@ namespace ConsoleRpgEntities.Migrations
                 {
                     b.HasBaseType("ConsoleRpgEntities.Models.Abilities.PlayerAbilities.Ability");
 
-                    b.HasDiscriminator().HasValue("Stab Ability");
+                    b.HasDiscriminator().HasValue("StabAbility");
                 });
 
             modelBuilder.Entity("ConsoleRpgEntities.Models.Characters.Monsters.Goblin", b =>

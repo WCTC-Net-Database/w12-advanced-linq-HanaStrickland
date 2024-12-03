@@ -5,6 +5,7 @@ using ConsoleRpgEntities.Models.Characters;
 using ConsoleRpgEntities.Models.Characters.Monsters;
 using ConsoleRpgEntities.Models;
 using Microsoft.EntityFrameworkCore;
+using ConsoleRpgEntities.Models.Abilities.PlayerAbilities;
 
 namespace ConsoleRpg.Services;
 
@@ -46,6 +47,7 @@ public class GameEngine
             _outputManager.WriteLine("5. Choose Items");
             _outputManager.WriteLine("6. Create a New Player");
             _outputManager.WriteLine("7. Cheat and Increase Stats");
+            _outputManager.WriteLine("8. Manage Abilities");
             _outputManager.WriteLine("0. Quit");
 
             _outputManager.Display();
@@ -73,10 +75,11 @@ public class GameEngine
                     CreateNewPlayer();
                     break;
                 case "7":
-                {
                     CheatMode();
                     break;
-                }
+                case "8":
+                    ManageAbilities();
+                    break;
                 case "0":
                     _outputManager.WriteLine("Exiting game...", ConsoleColor.Red);
                     _outputManager.Display();
@@ -216,19 +219,12 @@ public class GameEngine
 
     public void ChooseItems()
     {
+        Player player = GetValidPlayer();
         Console.WriteLine("Select a Player Id: ");
-        int playerIdSelection = Convert.ToInt32(Console.ReadLine());
+        int playerIdSelection = player.Id;
 
-        var playerSelection = _context.Players.Where(p => p.Id == playerIdSelection).FirstOrDefault();
-
-        if (playerSelection == null)
-        {
-        }
-        else
-        {
-            AddItem("Weapon", playerIdSelection);
-            AddItem("Armor", playerIdSelection);
-        }
+        AddItem("Weapon", playerIdSelection);
+        AddItem("Armor", playerIdSelection);
     }
 
     public void AddItem(string itemType , int playerId)
@@ -404,22 +400,43 @@ public class GameEngine
         
     }
 
-    public Player GetCheatingPlayer()
+    public Player FindPlayer(string search)
     {
-        bool invalidPlayer = true;
+        // If user entered a number, assume it's the ID,
+        // Else assume it's the Name
+        if (int.TryParse(search, out int result))
+        {
+            System.Console.WriteLine("Let's Search by ID");
+            Player player = _context.Players.Where(p => p.Id == result).FirstOrDefault();
+            return player;
+        }
+        else
+        {
+            System.Console.WriteLine("Let's Search by Name");
+            Player player = _context.Players
+                .ToList()
+                .FirstOrDefault(p => p.Name.Equals(search, StringComparison.Ordinal));
+            return player;
 
-        while (invalidPlayer)
+        }
+    }
+
+    public Player GetValidPlayer()
+    {
+        bool invalid = true;
+
+        while (invalid)
         {
             System.Console.WriteLine("Select a player by ID or Name: ");
-            string playerSearchInput = Console.ReadLine();
+            string searchInput = Console.ReadLine();
 
-            Player cheatingPlayer = FindPlayer(playerSearchInput);
+            Player toValidate = FindPlayer(searchInput);
 
-            if (cheatingPlayer != null)
+            if (toValidate != null)
             {
-                System.Console.WriteLine($"You've chosen to cheat using player {cheatingPlayer.Name}");
-                invalidPlayer = false;
-                return cheatingPlayer;
+                System.Console.WriteLine($"You've chosen player {toValidate.Name}");
+                invalid = false;
+                return toValidate;
             } 
             else
             {
@@ -433,7 +450,7 @@ public class GameEngine
     public void CheatMode()
     {
 
-        Player cheatingPlayer = GetCheatingPlayer();
+        Player cheatingPlayer = GetValidPlayer();
 
         Console.WriteLine("How would you like to cheat?:\n    1. Increase Experience\n    2. Increase Health");
 
@@ -480,25 +497,102 @@ public class GameEngine
         _context.SaveChanges();
     }
 
-    public Player FindPlayer(string search)
+
+
+public void ManageAbilities()
+    {
+        Console.WriteLine("Please select an option: ");
+        Console.WriteLine("    1. Add Abilities to Player");
+        Console.WriteLine("    2. Display Player Abilities");
+
+        string input = Console.ReadLine();
+
+        switch (input)
+        {
+            case "1":
+                AddPlayerAbilities();
+                break;
+            case "2":
+                System.Console.WriteLine("Display");
+                break;
+            default:
+                System.Console.WriteLine("Invalid Selection");
+                break;
+        }
+    }
+
+    public void AddPlayerAbilities()
+    {
+        // Ask for player and validate player selection
+        Player player = GetValidPlayer();
+
+        // Provide list of valid abilities
+        System.Console.WriteLine("Select an ability by ID to add to your player");
+        DisplayAbilities();
+
+        Ability selectedAbility = GetValidAbility();
+
+        System.Console.WriteLine($"You've selected the ability {selectedAbility.Name}");
+    }
+
+    public void DisplayAbilities()
+    {
+        var abilities = _context.Abilities;
+
+        foreach (var ability in abilities)
+        {
+            var id = ability.Id;
+            var name = ability.Name;
+            var damage = ability.Damage;
+            Console.WriteLine($"Id: {id}\tName: {name}\tDamage: {damage}");
+        }
+    }
+
+    public Ability FindAbility(string search)
     {
         // If user entered a number, assume it's the ID,
         // Else assume it's the Name
         if (int.TryParse(search, out int result))
         {
-            System.Console.WriteLine("Let's Search by Player ID");
-            Player player = _context.Players.Where(p => p.Id == result).FirstOrDefault();
-            return player;
+            System.Console.WriteLine("Let's Search by ID");
+            Ability ability = _context.Abilities.Where(a => a.Id == result).FirstOrDefault();
+            return ability;
         }
         else
         {
-            System.Console.WriteLine("Let's Search by Player Name");
-            Player player = _context.Players
+            System.Console.WriteLine("Let's Search by Name");
+            Ability ability = _context.Abilities
                 .ToList()
                 .FirstOrDefault(p => p.Name.Equals(search, StringComparison.Ordinal));
-            return player;
+            return ability;
 
         }
+    }
+
+     public Ability GetValidAbility()
+    {
+        bool invalid = true;
+
+        while (invalid)
+        {
+            System.Console.WriteLine("Select an Ability by ID or Name: ");
+            string searchInput = Console.ReadLine();
+
+            Ability toValidate = FindAbility(searchInput);
+
+            if (toValidate != null)
+            {
+                System.Console.WriteLine($"You've chosen ability {toValidate.Name}");
+                invalid = false;
+                return toValidate;
+            } 
+            else
+            {
+                System.Console.WriteLine("That ability does not exist.");
+            }
+        }
+
+        return null;
     }
 
 }
