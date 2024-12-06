@@ -6,6 +6,7 @@ using ConsoleRpgEntities.Models.Characters.Monsters;
 using ConsoleRpgEntities.Models;
 using Microsoft.EntityFrameworkCore;
 using ConsoleRpgEntities.Models.Abilities.PlayerAbilities;
+using ConsoleRpgEntities.Repositories;
 
 namespace ConsoleRpg.Services;
 
@@ -14,15 +15,21 @@ public class GameEngine
     private readonly GameContext _context;
     private readonly MenuManager _menuManager;
     private readonly OutputManager _outputManager;
+    private readonly ItemRepository _itemRepository;
+    private readonly PlayerRepository _playerRepository;
+    private readonly AbilitiesRepository _abilitiesRepository;
 
     private IPlayer _player;
     private IMonster _goblin;
 
-    public GameEngine(GameContext context, MenuManager menuManager, OutputManager outputManager)
+    public GameEngine(GameContext context, MenuManager menuManager, OutputManager outputManager, ItemRepository itemRepository, PlayerRepository playerRepository, AbilitiesRepository abilitiesRepository)
     {
         _menuManager = menuManager;
         _outputManager = outputManager;
         _context = context;
+        _itemRepository = itemRepository;
+        _playerRepository = playerRepository;
+        _abilitiesRepository = abilitiesRepository;
     }
 
     public void Run()
@@ -117,7 +124,7 @@ public class GameEngine
                System.Console.WriteLine("Enter player name or ID");
 
                 string input = Console.ReadLine();
-                Player player = FindPlayer(input);
+                Player player = _playerRepository.FindPlayer(input);
 
                 if (player != null)
                 {
@@ -138,32 +145,6 @@ public class GameEngine
         }
     }
 
-
-    public void SearchInventory()
-    {
-    Console.WriteLine("Search by Name: ");
-    string input = Console.ReadLine();
-     
-    var items = _context.Items.Where(item => item.Name.Contains(input));    
-               
-        foreach (var item in items)
-        {
-            Console.WriteLine($"Item: {item.Name}\tType:{item.Type}");
-        }
-    }
-
-    public void ListItemsByType()
-    {
-        var itemsByType = _context.Items
-            .GroupBy(t => t.Type)
-            .Select(g => new { Type = g.Key, Count = g.Count() })
-            .ToList();
-        foreach (var item in itemsByType)
-        {
-            Console.WriteLine($"{item.Type}\t{item.Count}");
-        }
-    }
-
     public void SortItems()      
     {
         Console.WriteLine("\nSort Options:");
@@ -177,155 +158,32 @@ public class GameEngine
         {
             case "1":
                 Console.WriteLine("Sort by Name");
-                SortByName();
+                _itemRepository.SortByName();
                 break;
             case "2":
                 Console.WriteLine("Sort by Attack Value");
-                SortByAttackValue();
+                _itemRepository.SortByAttackValue();
                 break;
             case "3":
                 Console.WriteLine("Sort by Defense Vaue");
-                SortByDefenseValue();
+                _itemRepository.SortByDefenseValue();
                 break;
             default:
                 Console.WriteLine("Invalid Selection");
                 break;
         }
     }
-    private void SortByName()
-    {
-        var allItems = _context.Items.OrderBy(i => i.Name);
-        foreach (var item in allItems)
-        {
-            Console.WriteLine($"\n{item.Name}");
-        }
-    }
-    private void SortByAttackValue()
-    {
-        var allItems = _context.Items.OrderBy(i => i.Attack);
-        foreach (var item in allItems)
-        {
-            Console.WriteLine($"\n{item.Name}\t{item.Attack}");
-        }
-    }
-    private void SortByDefenseValue()
-    {
-        var allItems = _context.Items.OrderBy(i => i.Defense);
-        foreach (var item in allItems)
-        {
-            Console.WriteLine($"\n{item.Name}\t{item.Defense}");
-        }
-    }
 
     public void ChooseItems()
     {
-        Player player = GetValidPlayer();
+        Player player = _playerRepository.GetValidPlayer();
         Console.WriteLine("Select a Player Id: ");
         int playerIdSelection = player.Id;
 
-        AddItem("Weapon", playerIdSelection);
-        AddItem("Armor", playerIdSelection);
+        _itemRepository.AddItem("Weapon", playerIdSelection);
+        _itemRepository.AddItem("Armor", playerIdSelection);
     }
 
-    public void AddItem(string itemType , int playerId)
-    {
-        bool addItem;
-
-        var query = from p in _context.Players
-            join i in _context.Items on p.Id equals i.PlayerId into itemGroup
-            from i in itemGroup.DefaultIfEmpty()
-            select new { player = p, item = i };
-        
-        var itemLookup = from q in query
-                   where q.item.Type == itemType && q.item.PlayerId == playerId
-                   select q;
-
-        
-        if (!itemLookup.Any()) // Check if itemLookup is empty
-        {
-            Console.WriteLine($"You have no items of type {itemType}");
-            addItem = true;
-        }
-        else
-        {
-            Console.WriteLine($"Do you want to add another item of type {itemType}? (Y/N)");
-            var input = Console.ReadLine().ToUpper()[0];
-
-            if (input == 'Y')
-            {
-                Console.WriteLine($"You've chosen to add an additional {itemType}.");
-                addItem = true;
-            }
-            else
-            {
-                Console.WriteLine($"You've chosen not to add an additional {itemType}.");
-                addItem = false;
-            }
-
-        }
-
-    bool itemNotAdded = true;
-    while (itemNotAdded)
-    {
-        if (addItem)
-            {
-                Console.WriteLine($"Let's add an item of type {itemType}");
-                Console.WriteLine($"Name the {itemType} you'd like to add: ");
-                var itemToAdd = Console.ReadLine();
-
-                var finditem = from i in _context.Items
-                    where i.Name == itemToAdd
-                    select i;
-
-                var itemsOfItemType = from f in finditem
-                        where f.Type == itemType
-                        select f;
-                
-                var itemHasNoPlayer = from f in itemsOfItemType
-                        where f.PlayerId == null
-                        select f;      
-
-                
-                    // Check the item exists
-                    if (finditem.Any())
-                    {
-                        // Check if item is the correct type
-                        if (itemsOfItemType.Any())
-                            {
-                                // Check it item is already taken
-                                if (itemHasNoPlayer.Any())
-                                {
-                                    System.Console.WriteLine($"The {itemType} {itemToAdd} is available.");
-                                    
-                                    var itemHasNoPlayerFirst = itemHasNoPlayer.FirstOrDefault();
-                                    itemHasNoPlayerFirst.PlayerId = playerId;
-
-                                    UpdateItem(itemHasNoPlayerFirst);
-                                    itemNotAdded = false;
-                                }
-                                else
-                                {
-                                    System.Console.WriteLine($"{itemToAdd} is already taken.");
-                                }
-                        }
-                        else
-                        {
-                            System.Console.WriteLine($"The item {itemToAdd} is not a valid {itemType}");
-                        }
-
-                    }
-                    else
-                    {
-                        System.Console.WriteLine($"That is not a valid item name.");
-                    }
-            } 
-        else
-        {
-            itemNotAdded = false;
-        }
-    }
-
-    }
     
     private void AttackCharacter()
     {
@@ -340,9 +198,9 @@ public class GameEngine
             }
             else
             {
-                var itemForAttack = getItem(itemIdForAttack);
+                var itemForAttack = _itemRepository.GetItemById(itemIdForAttack);
                 itemForAttack.PlayerId = null;
-                UpdateItem(itemForAttack);
+                _itemRepository.UpdateItem(itemForAttack);
             }
 
         }
@@ -366,23 +224,6 @@ public class GameEngine
         _goblin = _context.Monsters.OfType<Goblin>().FirstOrDefault();
     }
 
-    public void UpdateItem(Item item)
-    {
-        _context.Items.Update(item);
-        _context.SaveChanges();
-    }
-
-    public void DeleteItem(Item item)
-    {
-        _context.Items.Remove(item);
-        _context.SaveChanges();
-    }
-
-    public Item getItem(int id)
-    {
-        var retrievedItem = _context.Items.Where(i=> i.Id == id).FirstOrDefault();
-        return retrievedItem;
-    }
 
     public void CreateNewPlayer()
     {
@@ -396,61 +237,15 @@ public class GameEngine
                     Health = 100
                 };
 
-        AddPlayer(newPlayer);
+        _playerRepository.AddPlayer(newPlayer);
         
     }
 
-    public Player FindPlayer(string search)
-    {
-        // If user entered a number, assume it's the ID,
-        // Else assume it's the Name
-        if (int.TryParse(search, out int result))
-        {
-            System.Console.WriteLine("Let's Search by ID");
-            Player player = _context.Players.Where(p => p.Id == result).FirstOrDefault();
-            return player;
-        }
-        else
-        {
-            System.Console.WriteLine("Let's Search by Name");
-            Player player = _context.Players
-                .ToList()
-                .FirstOrDefault(p => p.Name.Equals(search, StringComparison.Ordinal));
-            return player;
-
-        }
-    }
-
-    public Player GetValidPlayer()
-    {
-        bool invalid = true;
-
-        while (invalid)
-        {
-            System.Console.WriteLine("Select a player by ID or Name: ");
-            string searchInput = Console.ReadLine();
-
-            Player toValidate = FindPlayer(searchInput);
-
-            if (toValidate != null)
-            {
-                System.Console.WriteLine($"You've chosen player {toValidate.Name}");
-                invalid = false;
-                return toValidate;
-            } 
-            else
-            {
-                System.Console.WriteLine("That Player does not exist.");
-            }
-        }
-
-        return null;
-    }
 
     public void CheatMode()
     {
 
-        Player cheatingPlayer = GetValidPlayer();
+        Player cheatingPlayer = _playerRepository.GetValidPlayer();
 
         Console.WriteLine("How would you like to cheat?:\n    1. Increase Experience\n    2. Increase Health");
 
@@ -460,11 +255,11 @@ public class GameEngine
         {
             case "1":
                 Console.WriteLine("Let's increase your experience points");
-                IncreasePlayerExperiencePoints(cheatingPlayer);
+                _playerRepository.IncreasePlayerExperiencePoints(cheatingPlayer);
                 break;
             case "2":
                 Console.WriteLine("Let's increase your health points");
-                IncreasePlayerHealthPoints(cheatingPlayer);
+                _playerRepository.IncreasePlayerHealthPoints(cheatingPlayer);
                 break;
             default:
                 Console.WriteLine("Invalid Selection");
@@ -472,31 +267,6 @@ public class GameEngine
         }
 
     }
-
-    public void IncreasePlayerExperiencePoints(Player player)
-    {
-        player.Experience += 5;
-        UpdatePlayer(player);
-    }
-
-    public void IncreasePlayerHealthPoints(Player player)
-    {
-        player.Health += 5;
-        UpdatePlayer(player);
-    }
-
-    public void UpdatePlayer(Player player)
-    {
-        _context.Players.Update(player);
-        _context.SaveChanges();
-    }
-
-    public void AddPlayer(Player player)
-    {
-        _context.Players.Add(player);
-        _context.SaveChanges();
-    }
-
 
 
 public void ManageAbilities()
@@ -510,7 +280,7 @@ public void ManageAbilities()
         switch (input)
         {
             case "1":
-                AddPlayerAbilities();
+                _abilitiesRepository.AddPlayerAbilities();
                 break;
             case "2":
                 System.Console.WriteLine("Display");
@@ -520,79 +290,4 @@ public void ManageAbilities()
                 break;
         }
     }
-
-    public void AddPlayerAbilities()
-    {
-        // Ask for player and validate player selection
-        Player player = GetValidPlayer();
-
-        // Provide list of valid abilities
-        System.Console.WriteLine("Select an ability by ID to add to your player");
-        DisplayAbilities();
-
-        Ability selectedAbility = GetValidAbility();
-
-        System.Console.WriteLine($"You've selected the ability {selectedAbility.Name}");
-    }
-
-    public void DisplayAbilities()
-    {
-        var abilities = _context.Abilities;
-
-        foreach (var ability in abilities)
-        {
-            var id = ability.Id;
-            var name = ability.Name;
-            var damage = ability.Damage;
-            Console.WriteLine($"Id: {id}\tName: {name}\tDamage: {damage}");
-        }
-    }
-
-    public Ability FindAbility(string search)
-    {
-        // If user entered a number, assume it's the ID,
-        // Else assume it's the Name
-        if (int.TryParse(search, out int result))
-        {
-            System.Console.WriteLine("Let's Search by ID");
-            Ability ability = _context.Abilities.Where(a => a.Id == result).FirstOrDefault();
-            return ability;
-        }
-        else
-        {
-            System.Console.WriteLine("Let's Search by Name");
-            Ability ability = _context.Abilities
-                .ToList()
-                .FirstOrDefault(p => p.Name.Equals(search, StringComparison.Ordinal));
-            return ability;
-
-        }
-    }
-
-     public Ability GetValidAbility()
-    {
-        bool invalid = true;
-
-        while (invalid)
-        {
-            System.Console.WriteLine("Select an Ability by ID or Name: ");
-            string searchInput = Console.ReadLine();
-
-            Ability toValidate = FindAbility(searchInput);
-
-            if (toValidate != null)
-            {
-                System.Console.WriteLine($"You've chosen ability {toValidate.Name}");
-                invalid = false;
-                return toValidate;
-            } 
-            else
-            {
-                System.Console.WriteLine("That ability does not exist.");
-            }
-        }
-
-        return null;
-    }
-
 }
