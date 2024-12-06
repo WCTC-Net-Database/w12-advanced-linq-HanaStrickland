@@ -1,0 +1,2 @@
+DELETE FROM Monsters
+WHERE Id != 1;
