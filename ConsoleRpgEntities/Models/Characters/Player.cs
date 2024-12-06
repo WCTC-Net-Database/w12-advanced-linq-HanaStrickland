@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using ConsoleRpgEntities.Models;
 using ConsoleRpgEntities.Models.Characters.Monsters;
 
+
 namespace ConsoleRpgEntities.Models.Characters
 {
     public class Player : ITargetable, IPlayer
@@ -14,6 +15,8 @@ namespace ConsoleRpgEntities.Models.Characters
         public int Health { get; set; }
 
         // Navigation properties
+        public virtual Room Room { get; set; }
+        public virtual int? RoomId { get; set; }
         public virtual ICollection<Item> Items { get; set; }
         public virtual ICollection<Ability> Abilities { get; set; }
 

@@ -1,11 +1,12 @@
 ﻿using ConsoleRpgEntities.Models.Attributes;
 
-namespace ConsoleRpgEntities.Models.Characters.Monsters;
-
-public interface IMonster
+namespace ConsoleRpgEntities.Models.Characters.Monsters
 {
-    int Id { get; set; }
-    string Name { get; set; }
+    public interface IMonster
+    {
+        int Id { get; set; }
+        string Name { get; set; }
 
-    void Attack(ITargetable target);
+        void Attack(ITargetable target);
+    }
 }

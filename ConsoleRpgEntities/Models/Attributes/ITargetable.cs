@@ -1,7 +1,8 @@
-﻿namespace ConsoleRpgEntities.Models.Attributes;
-
-public interface ITargetable
+﻿namespace ConsoleRpgEntities.Models.Attributes
 {
-    string Name { get; set; }
-    int Health { get; set; }
+    public interface ITargetable
+    {
+        string Name { get; set; }
+        int Health { get; set; }
+    }
 }

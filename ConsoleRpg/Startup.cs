@@ -11,49 +11,50 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NReco.Logging.File;
 
-namespace ConsoleRpg;
-
-public static class Startup
+namespace ConsoleRpg
 {
-    public static void ConfigureServices(IServiceCollection services)
+    public static class Startup
     {
-        // Build configuration
-        var configuration = ConfigurationHelper.GetConfiguration();
-
-        // Create and bind FileLoggerOptions
-        var fileLoggerOptions = new NReco.Logging.File.FileLoggerOptions();
-        configuration.GetSection("Logging:File").Bind(fileLoggerOptions);
-
-        // Configure logging
-        services.AddLogging(loggingBuilder =>
+        public static void ConfigureServices(IServiceCollection services)
         {
-            loggingBuilder.ClearProviders();
-            loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
+            // Build configuration
+            var configuration = ConfigurationHelper.GetConfiguration();
 
-            // Add Console logger
-            loggingBuilder.AddConsole();
+            // Create and bind FileLoggerOptions
+            var fileLoggerOptions = new NReco.Logging.File.FileLoggerOptions();
+            configuration.GetSection("Logging:File").Bind(fileLoggerOptions);
 
-            // Add File logger using the correct constructor
-            var logFileName = "Logs/log.txt"; // Specify the log file path
+            // Configure logging
+            services.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.ClearProviders();
+                loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
 
-            loggingBuilder.AddProvider(new FileLoggerProvider(logFileName, fileLoggerOptions));
-        });
+                // Add Console logger
+                loggingBuilder.AddConsole();
 
-        // Register DbContext with dependency injection
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
-        services.AddDbContext<GameContext>(options =>
-        {
-            ConfigurationHelper.ConfigureDbContextOptions(options, connectionString);
-        });
+                // Add File logger using the correct constructor
+                var logFileName = "Logs/log.txt"; // Specify the log file path
+
+                loggingBuilder.AddProvider(new FileLoggerProvider(logFileName, fileLoggerOptions));
+            });
+
+            // Register DbContext with dependency injection
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            services.AddDbContext<GameContext>(options =>
+            {
+                ConfigurationHelper.ConfigureDbContextOptions(options, connectionString);
+            });
 
 
-        // Register your services
-        services.AddTransient<GameEngine>();
-        services.AddTransient<MenuManager>();
-        services.AddSingleton<OutputManager>();
-        services.AddTransient<ItemRepository>();
-        services.AddTransient<PlayerRepository>();
-        services.AddTransient<AbilitiesRepository>();
-        services.AddTransient<PlayerService>();
+            // Register your services
+            services.AddTransient<GameEngine>();
+            services.AddTransient<MenuManager>();
+            services.AddSingleton<OutputManager>();
+            services.AddTransient<ItemRepository>();
+            services.AddTransient<PlayerRepository>();
+            services.AddTransient<AbilitiesRepository>();
+            services.AddTransient<PlayerService>();
+        }
     }
 }
