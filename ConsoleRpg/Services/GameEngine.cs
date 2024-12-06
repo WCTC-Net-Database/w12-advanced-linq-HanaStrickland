@@ -269,7 +269,7 @@ public class GameEngine
     }
 
 
-public void ManageAbilities()
+    public void ManageAbilities()
     {
         Console.WriteLine("Please select an option: ");
         Console.WriteLine("    1. Add Abilities to Player");
@@ -280,14 +280,40 @@ public void ManageAbilities()
         switch (input)
         {
             case "1":
-                _abilitiesRepository.AddPlayerAbilities();
+                AddAbilityToPlayer();
                 break;
             case "2":
-                System.Console.WriteLine("Display");
+                DisplayPlayerAbilities();
                 break;
             default:
                 System.Console.WriteLine("Invalid Selection");
                 break;
+        }
+    }
+    public void AddAbilityToPlayer()
+    {
+        // Ask for player and validate player selection
+        Player player =  _playerRepository.GetValidPlayer();
+
+        // Provide list of valid abilities
+        System.Console.WriteLine("Select an ability by ID to add to your player");
+        _abilitiesRepository.DisplayAbilities();
+
+        Ability selectedAbility = _abilitiesRepository.GetValidAbility();
+
+        System.Console.WriteLine($"You've selected the ability {selectedAbility.Name}");
+        _abilitiesRepository.AddPlayerAbilities(player, selectedAbility);
+    }
+
+    public void DisplayPlayerAbilities()
+    {
+        Player player =  _playerRepository.GetValidPlayer();
+
+        var playerAbilitiesList = player.Abilities.ToList();
+
+        foreach (var ability in playerAbilitiesList)
+        {
+            System.Console.WriteLine(ability.Name);
         }
     }
 }

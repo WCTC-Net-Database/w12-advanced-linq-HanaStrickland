@@ -37,20 +37,6 @@ namespace ConsoleRpgEntities.Repositories
             }
         }
 
-        public void AddPlayerAbilities()
-        {
-            // Ask for player and validate player selection
-            Player player =  _playerRepository.GetValidPlayer();
-
-            // Provide list of valid abilities
-            System.Console.WriteLine("Select an ability by ID to add to your player");
-            DisplayAbilities();
-
-            Ability selectedAbility = GetValidAbility();
-
-            System.Console.WriteLine($"You've selected the ability {selectedAbility.Name}");
-        }
-
         public Ability FindAbility(string search)
         {
             // If user entered a number, assume it's the ID,
@@ -100,6 +86,12 @@ namespace ConsoleRpgEntities.Repositories
 
 
         // UPDATE
+
+        public void AddPlayerAbilities(Player player, Ability ability)
+        {
+            player.Abilities.Add(ability);
+            _context.SaveChanges();
+        }
 
         // DELETE
         
