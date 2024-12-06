@@ -88,16 +88,6 @@ namespace ConsoleRpgEntities.Repositories
             _context.SaveChanges();
         }
 
-        // UPDATE - ensure we are updating the item in the database
-        public void UpdateItemAttack(int id, int attack)
-        {
-            // MUST get existing item from database to update it
-            var item = GetItemById(id);
-
-            item.Attack = attack;
-            UpdateItem(item);
-        }
-
         public void AddItem(string itemType , int playerId)
         {
             bool addItem;

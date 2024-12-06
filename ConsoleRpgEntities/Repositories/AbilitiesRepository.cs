@@ -94,6 +94,11 @@ namespace ConsoleRpgEntities.Repositories
         }
 
         // DELETE
+        public void RemovePlayerAbilities(Player player, Ability ability)
+        {
+            player.Abilities.Remove(ability);
+            _context.SaveChanges();
+        }
         
 
     }

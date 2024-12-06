@@ -9,9 +9,4 @@ public interface IPlayer
     string Name { get; set; }
 
     ICollection<Ability> Abilities { get; set; }
-
-    int Attack(ITargetable target);
-    void UseAbility(IAbility ability, ITargetable target);
-
-
 }

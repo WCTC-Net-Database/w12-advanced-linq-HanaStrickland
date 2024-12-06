@@ -7,6 +7,7 @@ using ConsoleRpgEntities.Models;
 using Microsoft.EntityFrameworkCore;
 using ConsoleRpgEntities.Models.Abilities.PlayerAbilities;
 using ConsoleRpgEntities.Repositories;
+using ConsoleRpgEntities.Services;
 
 namespace ConsoleRpg.Services;
 
@@ -18,11 +19,12 @@ public class GameEngine
     private readonly ItemRepository _itemRepository;
     private readonly PlayerRepository _playerRepository;
     private readonly AbilitiesRepository _abilitiesRepository;
+    private readonly PlayerService _playerService;
 
-    private IPlayer _player;
+    private Player _player;
     private IMonster _goblin;
 
-    public GameEngine(GameContext context, MenuManager menuManager, OutputManager outputManager, ItemRepository itemRepository, PlayerRepository playerRepository, AbilitiesRepository abilitiesRepository)
+    public GameEngine(GameContext context, MenuManager menuManager, OutputManager outputManager, ItemRepository itemRepository, PlayerRepository playerRepository, AbilitiesRepository abilitiesRepository, PlayerService playerService)
     {
         _menuManager = menuManager;
         _outputManager = outputManager;
@@ -30,6 +32,7 @@ public class GameEngine
         _itemRepository = itemRepository;
         _playerRepository = playerRepository;
         _abilitiesRepository = abilitiesRepository;
+        _playerService = playerService;
     }
 
     public void Run()
@@ -47,7 +50,7 @@ public class GameEngine
         while (true)
         {
             _outputManager.WriteLine("Choose an action:", ConsoleColor.Cyan);
-            _outputManager.WriteLine("1. Attack");
+            _outputManager.WriteLine("1. Make a Play");
             _outputManager.WriteLine("2. Display All Players");
             _outputManager.WriteLine("3. Search Players");
             _outputManager.WriteLine("4. Sort Items");
@@ -64,7 +67,7 @@ public class GameEngine
             switch (input)
             {
                 case "1":
-                    AttackCharacter();
+                    MakeAPlay();
                     break;
                 case "2":
                     DisplayAllPlayers();
@@ -184,25 +187,38 @@ public class GameEngine
         _itemRepository.AddItem("Armor", playerIdSelection);
     }
 
+    private void MakeAPlay()
+    {
+        System.Console.WriteLine("Do you want to\n1. Attack\n2.Use Ability");
+        string input = Console.ReadLine();
+
+        switch (input)
+        {
+            case "1":
+                AttackCharacter();
+                break;
+            case "2":
+                UseAbility();
+                break;
+            default:
+                Console.WriteLine("Invalid Selection");
+                break;
+        }
+    }
     
     private void AttackCharacter()
     {
         if (_goblin is ITargetable targetableGoblin)
         {
-            int itemIdForAttack = _player.Attack(targetableGoblin);
-            _player.UseAbility(_player.Abilities.First(), targetableGoblin);
+            _playerService.Attack(_player, targetableGoblin);
+        }
+    }
 
-            if (itemIdForAttack == 0)
-            {
-                Console.WriteLine("There was no attack, so no items to remove.");
-            }
-            else
-            {
-                var itemForAttack = _itemRepository.GetItemById(itemIdForAttack);
-                itemForAttack.PlayerId = null;
-                _itemRepository.UpdateItem(itemForAttack);
-            }
-
+    private void UseAbility()
+    {
+        if (_goblin is ITargetable targetableGoblin)
+        {
+            _playerService.UseAbility(_player, targetableGoblin);
         }
     }
 
