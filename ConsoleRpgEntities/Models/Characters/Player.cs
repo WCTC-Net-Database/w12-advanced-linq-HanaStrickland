@@ -3,6 +3,7 @@ using ConsoleRpgEntities.Models.Attributes;
 using System.ComponentModel.DataAnnotations;
 using ConsoleRpgEntities.Models;
 using ConsoleRpgEntities.Models.Characters.Monsters;
+using ConsoleRpgEntities.Models.Rooms;
 
 
 namespace ConsoleRpgEntities.Models.Characters
