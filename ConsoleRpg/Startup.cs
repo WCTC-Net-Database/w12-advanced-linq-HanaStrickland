@@ -54,6 +54,7 @@ namespace ConsoleRpg
             services.AddTransient<ItemRepository>();
             services.AddTransient<PlayerRepository>();
             services.AddTransient<AbilitiesRepository>();
+            services.AddTransient<RoomRepository>();
             services.AddTransient<PlayerService>();
         }
     }

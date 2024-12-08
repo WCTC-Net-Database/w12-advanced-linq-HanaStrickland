@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using ConsoleRpgEntities.Models.Abilities.PlayerAbilities;
 using ConsoleRpgEntities.Repositories;
 using ConsoleRpgEntities.Services;
+using ConsoleRpgEntities.Models.Rooms;
 
 namespace ConsoleRpg.Services
 {
@@ -19,12 +20,14 @@ namespace ConsoleRpg.Services
         private readonly ItemRepository _itemRepository;
         private readonly PlayerRepository _playerRepository;
         private readonly AbilitiesRepository _abilitiesRepository;
+        private readonly RoomRepository _roomRepository;
         private readonly PlayerService _playerService;
 
         private Player _player;
         private IMonster _goblin;
 
-        public GameEngine(GameContext context, MenuManager menuManager, OutputManager outputManager, ItemRepository itemRepository, PlayerRepository playerRepository, AbilitiesRepository abilitiesRepository, PlayerService playerService)
+        public GameEngine(GameContext context, MenuManager menuManager, OutputManager outputManager, ItemRepository itemRepository, 
+        PlayerRepository playerRepository, AbilitiesRepository abilitiesRepository, RoomRepository roomRepository, PlayerService playerService)
         {
             _menuManager = menuManager;
             _outputManager = outputManager;
@@ -32,6 +35,7 @@ namespace ConsoleRpg.Services
             _itemRepository = itemRepository;
             _playerRepository = playerRepository;
             _abilitiesRepository = abilitiesRepository;
+            _roomRepository = roomRepository;
             _playerService = playerService;
         }
 
@@ -71,7 +75,7 @@ namespace ConsoleRpg.Services
                         MakeAPlay();
                         break;
                     case "2":
-                        System.Console.WriteLine("Make a Move");
+                        PlayerMove();
                         break;
                     case "3":
                         _playerRepository.SearchPlayers();
@@ -110,6 +114,7 @@ namespace ConsoleRpg.Services
         {
             _player = _context.Players.FirstOrDefault();
             _outputManager.WriteLine($"{_player.Name} has entered the game.", ConsoleColor.Green);
+            _playerRepository.AddPlayerToStartRoomSunlitClearing(_player);
 
             // Load monsters into random rooms 
             LoadMonsters();
@@ -118,6 +123,102 @@ namespace ConsoleRpg.Services
             Thread.Sleep(500);
             GameLoop();
         }
+
+        private void PlayerMove()
+        {
+            bool moving = true;
+
+            while (moving)
+            {
+
+                int playerCurrentRoomId = _playerRepository.GetPlayerCurrentRoomId(_player);
+
+                var currentRoom = _roomRepository.GetRoomById(playerCurrentRoomId);
+                System.Console.WriteLine($"Player is currently in room {currentRoom.Name}");
+
+                Room? nextRoom = null;
+
+                while (nextRoom == null)
+                {
+                    System.Console.WriteLine("Which direction do you want to move?");
+                    System.Console.WriteLine("N. North\nS. South\nE. East\nW. West\nQ. Stop Moving");
+                    char input = Console.ReadLine().ToUpper()[0];
+
+                if (input == 'N')
+                {
+                    bool exists = _roomRepository.CheckNorthDirection(playerCurrentRoomId);
+
+                    if (exists)
+                    {
+                        nextRoom = _roomRepository.GetNextRoomByCurrentRoomId(playerCurrentRoomId, 'N');
+                        _player.RoomId = nextRoom.Id;
+                        _playerRepository.UpdatePlayer(_player);
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("You Can't Move North");
+                    }
+
+                }
+                else if (input == 'S')
+                {
+                    bool exists = _roomRepository.CheckSouthDirection(playerCurrentRoomId);
+
+                    if (exists)
+                    {
+                        nextRoom = _roomRepository.GetNextRoomByCurrentRoomId(playerCurrentRoomId, 'S');
+                        _player.RoomId = nextRoom.Id;
+                        _playerRepository.UpdatePlayer(_player);
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("You Can't Move South");
+                    }
+                }
+                else if (input == 'E')
+                {
+                    bool exists = _roomRepository.CheckEastDirection(playerCurrentRoomId);
+
+                    if (exists)
+                    {
+                        nextRoom = _roomRepository.GetNextRoomByCurrentRoomId(playerCurrentRoomId, 'E');
+                        _player.RoomId = nextRoom.Id;
+                        _playerRepository.UpdatePlayer(_player);
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("You Can't Move East");
+                    }
+                }
+                else if (input == 'W')
+                {
+                    bool exists = _roomRepository.CheckWestDirection(playerCurrentRoomId);
+
+                    if (exists)
+                    {
+                        nextRoom = _roomRepository.GetNextRoomByCurrentRoomId(playerCurrentRoomId, 'W');
+                        _player.RoomId = nextRoom.Id;
+                        _playerRepository.UpdatePlayer(_player);
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("You Can't Move West");
+                    }
+                }
+                else if (input == 'Q')
+                {
+                    moving = false;
+                    break;
+                }
+                else
+                {
+                    System.Console.WriteLine("Invalid Input");
+                }
+                }
+                
+            }
+        }
+
 
         private void LoadMonsters()
         {

@@ -118,6 +118,13 @@ namespace ConsoleRpgEntities.Repositories
             return null;
         }
 
+        public int GetPlayerCurrentRoomId(Player player)
+        {
+            var id = player.RoomId;
+
+            return Convert.ToInt32(id);
+        }
+
         // UPDATE
 
         public void UpdatePlayer(Player player)
@@ -135,6 +142,12 @@ namespace ConsoleRpgEntities.Repositories
         public void IncreasePlayerHealthPoints(Player player)
         {
             player.Health += 5;
+            UpdatePlayer(player);
+        }
+
+        public void AddPlayerToStartRoomSunlitClearing(Player player)
+        {
+            player.RoomId = 0;
             UpdatePlayer(player);
         }
     }
