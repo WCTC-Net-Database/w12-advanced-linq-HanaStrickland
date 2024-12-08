@@ -51,13 +51,14 @@ namespace ConsoleRpg.Services
             {
                 _outputManager.WriteLine("Choose an action:", ConsoleColor.Cyan);
                 _outputManager.WriteLine("1. Make a Play");
-                _outputManager.WriteLine("2. Display All Players");
+                _outputManager.WriteLine("2. Make a Move");
                 _outputManager.WriteLine("3. Search Players");
                 _outputManager.WriteLine("4. Sort Items");
                 _outputManager.WriteLine("5. Choose Items");
                 _outputManager.WriteLine("6. Create a New Player");
                 _outputManager.WriteLine("7. Cheat and Increase Stats");
                 _outputManager.WriteLine("8. Manage Abilities");
+                _outputManager.WriteLine("9. Display All Players");
                 _outputManager.WriteLine("0. Quit");
 
                 _outputManager.Display();
@@ -70,10 +71,10 @@ namespace ConsoleRpg.Services
                         MakeAPlay();
                         break;
                     case "2":
-                        DisplayAllPlayers();
+                        System.Console.WriteLine("Make a Move");
                         break;
                     case "3":
-                        SearchPlayers();
+                        _playerRepository.SearchPlayers();
                         break;
                     case "4":
                         SortItems();
@@ -90,6 +91,9 @@ namespace ConsoleRpg.Services
                     case "8":
                         ManageAbilities();
                         break;
+                    case "9":
+                        _playerRepository.DisplayAllPlayers();
+                        break;
                     case "0":
                         _outputManager.WriteLine("Exiting game...", ConsoleColor.Red);
                         _outputManager.Display();
@@ -102,50 +106,22 @@ namespace ConsoleRpg.Services
             }
         }
 
-        public void DisplayAllPlayers()
+        private void SetupGame()
         {
-            var players = _context.Players;
+            _player = _context.Players.FirstOrDefault();
+            _outputManager.WriteLine($"{_player.Name} has entered the game.", ConsoleColor.Green);
 
-            foreach (var player in players)
-            {
-                System.Console.WriteLine($"Id: {player.Id}\tName: {player.Name}\tExperience: {player.Experience}\tHealth: {player.Health}");
-            }
+            // Load monsters into random rooms 
+            LoadMonsters();
+
+            // Pause before starting the game loop
+            Thread.Sleep(500);
+            GameLoop();
         }
 
-        public void SearchPlayers()
+        private void LoadMonsters()
         {
-            var players = _context.Players;
-
-            bool searchDone = false;
-
-            while (!searchDone)
-            {
-                // check if there are any players in the table
-
-                if (players.Any())
-                {
-                   System.Console.WriteLine("Enter player name or ID");
-
-                    string input = Console.ReadLine();
-                    Player player = _playerRepository.FindPlayer(input);
-
-                    if (player != null)
-                    {
-                        System.Console.WriteLine($"Id: {player.Id}\tName: {player.Name}\tExperience: {player.Experience}\tHealth: {player.Health}");
-                        searchDone = true;
-                    }
-                    else
-                    {
-                        System.Console.WriteLine("The player does not exist");
-                    }
-
-                }
-                else
-                {
-                    System.Console.WriteLine("There are no players");
-                    searchDone = true;
-                }
-            }
+            _goblin = _context.Monsters.OfType<Goblin>().FirstOrDefault();
         }
 
         public void SortItems()      
@@ -222,23 +198,6 @@ namespace ConsoleRpg.Services
             }
         }
 
-        private void SetupGame()
-        {
-            _player = _context.Players.FirstOrDefault();
-            _outputManager.WriteLine($"{_player.Name} has entered the game.", ConsoleColor.Green);
-
-            // Load monsters into random rooms 
-            LoadMonsters();
-
-            // Pause before starting the game loop
-            Thread.Sleep(500);
-            GameLoop();
-        }
-
-        private void LoadMonsters()
-        {
-            _goblin = _context.Monsters.OfType<Goblin>().FirstOrDefault();
-        }
 
 
         public void CreateNewPlayer()

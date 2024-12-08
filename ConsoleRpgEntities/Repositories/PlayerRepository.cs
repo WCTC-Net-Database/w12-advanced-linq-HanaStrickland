@@ -26,6 +26,52 @@ namespace ConsoleRpgEntities.Repositories
 
         // READ
 
+        public void DisplayAllPlayers()
+        {
+            var players = _context.Players;
+
+            foreach (var player in players)
+            {
+                System.Console.WriteLine($"Id: {player.Id}\tName: {player.Name}\tExperience: {player.Experience}\tHealth: {player.Health}");
+            }
+        }
+
+        public void SearchPlayers()
+        {
+            var players = _context.Players;
+
+            bool searchDone = false;
+
+            while (!searchDone)
+            {
+                // check if there are any players in the table
+
+                if (players.Any())
+                {
+                   System.Console.WriteLine("Enter player name or ID");
+
+                    string input = Console.ReadLine();
+                    Player player = FindPlayer(input);
+
+                    if (player != null)
+                    {
+                        System.Console.WriteLine($"Id: {player.Id}\tName: {player.Name}\tExperience: {player.Experience}\tHealth: {player.Health}");
+                        searchDone = true;
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("The player does not exist");
+                    }
+
+                }
+                else
+                {
+                    System.Console.WriteLine("There are no players");
+                    searchDone = true;
+                }
+            }
+        }
+
         public Player FindPlayer(string search)
         {
             // If user entered a number, assume it's the ID,

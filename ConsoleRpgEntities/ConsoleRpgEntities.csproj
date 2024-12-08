@@ -11,7 +11,6 @@
     <Compile Remove="Models\Characters\Npcs\**" />
     <EmbeddedResource Remove="Models\Abilities\MonsterAbilities\**" />
     <EmbeddedResource Remove="Models\Characters\Npcs\**" />
-    <EmbeddedResource Remove="Models\Rooms\**" />
     <None Remove="Models\Abilities\MonsterAbilities\**" />
     <None Remove="Models\Characters\Npcs\**" />
   </ItemGroup>
@@ -38,6 +37,24 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Migrations\Scripts\InitialSeedData.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+     <Content Include="Migrations\Scripts\SeedAbilities.rollback.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Migrations\Scripts\SeedAbilities.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+     <Content Include="Migrations\Scripts\SeedRooms.rollback.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Migrations\Scripts\SeedRooms.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+       <Content Include="Migrations\Scripts\SeedMonsters.rollback.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Migrations\Scripts\SeedMonsters.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
