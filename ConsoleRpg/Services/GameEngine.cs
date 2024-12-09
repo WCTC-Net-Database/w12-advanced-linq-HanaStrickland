@@ -132,86 +132,90 @@ namespace ConsoleRpg.Services
                 var currentRoom = _roomRepository.GetRoomById(playerCurrentRoomId);
                 System.Console.WriteLine($"Player is currently in room {currentRoom.Name}");
 
-                Room? nextRoom = null;
-
-                while (nextRoom == null)
+                bool notValid = true;
+                while (notValid)
                 {
                     System.Console.WriteLine("Which direction do you want to move?");
                     System.Console.WriteLine("N. North\nS. South\nE. East\nW. West\nQ. Stop Moving");
-                    char input = Console.ReadLine().ToUpper()[0];
-
-                if (input == 'N')
-                {
+                    char direction = Console.ReadLine().ToUpper()[0];
+                    notValid = TryMoving(direction, playerCurrentRoomId);
+                    if (direction == 'Q')
+                    {
+                        moving = false;
+                    }
+                }
+            }
+        }
+        
+        private bool TryMoving(char direction, int playerCurrentRoomId)
+        {
+            switch (direction)
+            {
+                case 'N':
                     bool exists = _roomRepository.CheckNorthDirection(playerCurrentRoomId);
 
                     if (exists)
                     {
-                        nextRoom = _roomRepository.GetNextRoomByCurrentRoomId(playerCurrentRoomId, 'N');
+                        Room nextRoom = _roomRepository.GetNextRoomByCurrentRoomId(playerCurrentRoomId, 'N');
                         _player.RoomId = nextRoom.Id;
                         _playerRepository.UpdatePlayer(_player);
+                        return false;
                     }
                     else
                     {
                         System.Console.WriteLine("You Can't Move North");
+                        return true;
                     }
-
-                }
-                else if (input == 'S')
-                {
-                    bool exists = _roomRepository.CheckSouthDirection(playerCurrentRoomId);
+                case 'S':
+                    exists = _roomRepository.CheckSouthDirection(playerCurrentRoomId);
 
                     if (exists)
                     {
-                        nextRoom = _roomRepository.GetNextRoomByCurrentRoomId(playerCurrentRoomId, 'S');
+                        Room nextRoom = _roomRepository.GetNextRoomByCurrentRoomId(playerCurrentRoomId, 'S');
                         _player.RoomId = nextRoom.Id;
                         _playerRepository.UpdatePlayer(_player);
+                        return false;
                     }
                     else
                     {
                         System.Console.WriteLine("You Can't Move South");
+                        return true;
                     }
-                }
-                else if (input == 'E')
-                {
-                    bool exists = _roomRepository.CheckEastDirection(playerCurrentRoomId);
+                case 'E':
+                    exists = _roomRepository.CheckEastDirection(playerCurrentRoomId);
 
                     if (exists)
                     {
-                        nextRoom = _roomRepository.GetNextRoomByCurrentRoomId(playerCurrentRoomId, 'E');
+                        Room nextRoom = _roomRepository.GetNextRoomByCurrentRoomId(playerCurrentRoomId, 'E');
                         _player.RoomId = nextRoom.Id;
                         _playerRepository.UpdatePlayer(_player);
+                        return false;
                     }
                     else
                     {
                         System.Console.WriteLine("You Can't Move East");
+                        return true;
                     }
-                }
-                else if (input == 'W')
-                {
-                    bool exists = _roomRepository.CheckWestDirection(playerCurrentRoomId);
+                case 'W':
+                    exists = _roomRepository.CheckWestDirection(playerCurrentRoomId);
 
                     if (exists)
                     {
-                        nextRoom = _roomRepository.GetNextRoomByCurrentRoomId(playerCurrentRoomId, 'W');
+                        Room nextRoom = _roomRepository.GetNextRoomByCurrentRoomId(playerCurrentRoomId, 'W');
                         _player.RoomId = nextRoom.Id;
                         _playerRepository.UpdatePlayer(_player);
+                        return false;
                     }
                     else
                     {
                         System.Console.WriteLine("You Can't Move West");
+                        return true;
                     }
-                }
-                else if (input == 'Q')
-                {
-                    moving = false;
-                    break;
-                }
-                else
-                {
-                    System.Console.WriteLine("Invalid Input");
-                }
-                }
-                
+                case 'Q':
+                    return false;
+                default:
+                    System.Console.WriteLine("Invalid Selection");
+                    return true;
             }
         }
 
