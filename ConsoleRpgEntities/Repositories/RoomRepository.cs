@@ -19,6 +19,13 @@ namespace ConsoleRpgEntities.Repositories
             _context = context;
         }
 
+        // CREATE
+        public void AddRoom(Room room)
+        {
+            _context.Room.Add(room);
+            _context.SaveChanges();
+        }
+        
         // READ
 
         public Room GetRoomById(int id)
@@ -117,6 +124,59 @@ namespace ConsoleRpgEntities.Repositories
             {
                 return false;
             }
+        }
+
+        public Room FindRoom(string search)
+        {
+            // If user entered a number, assume it's the ID,
+            // Else assume it's the Name
+            if (int.TryParse(search, out int result))
+            {
+                System.Console.WriteLine("Let's Search by ID");
+                Room room = _context.Room.Where(p => p.Id == result).FirstOrDefault();
+                return room;
+            }
+            else
+            {
+                System.Console.WriteLine("Let's Search by Name");
+                Room room = _context.Room
+                    .ToList()
+                    .FirstOrDefault(p => p.Name.Equals(search, StringComparison.Ordinal));
+                return room;
+
+            }
+        }
+        public Room GetValidRoom()
+        {
+            bool invalid = true;
+
+            while (invalid)
+            {
+                System.Console.WriteLine("Select a Room by ID or Name: ");
+                string searchInput = Console.ReadLine();
+
+                Room toValidate = FindRoom(searchInput);
+
+                if (toValidate != null)
+                {
+                    System.Console.WriteLine($"You've chosen Room {toValidate.Name}");
+                    invalid = false;
+                    return toValidate;
+                } 
+                else
+                {
+                    System.Console.WriteLine("That Room does not exist.");
+                }
+            }
+
+            return null;
+        }
+
+        // Update
+        public void UpdateRoom(Room room)
+        {
+            _context.Room.Update(room);
+            _context.SaveChanges();
         }
     }
 }

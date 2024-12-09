@@ -56,13 +56,11 @@ namespace ConsoleRpg.Services
                 _outputManager.WriteLine("Choose an action:", ConsoleColor.Cyan);
                 _outputManager.WriteLine("1. Make a Play");
                 _outputManager.WriteLine("2. Make a Move");
-                _outputManager.WriteLine("3. Search Players");
-                _outputManager.WriteLine("4. Sort Items");
-                _outputManager.WriteLine("5. Choose Items");
-                _outputManager.WriteLine("6. Create a New Player");
+                _outputManager.WriteLine("3. Manage Players");
+                _outputManager.WriteLine("4. Manage Items");
+                _outputManager.WriteLine("5. Manage Abilities");
+                _outputManager.WriteLine("6. Manage Rooms");
                 _outputManager.WriteLine("7. Cheat and Increase Stats");
-                _outputManager.WriteLine("8. Manage Abilities");
-                _outputManager.WriteLine("9. Display All Players");
                 _outputManager.WriteLine("0. Quit");
 
                 _outputManager.Display();
@@ -78,25 +76,19 @@ namespace ConsoleRpg.Services
                         PlayerMove();
                         break;
                     case "3":
-                        _playerRepository.SearchPlayers();
+                        ManagePlayers();
                         break;
                     case "4":
-                        SortItems();
+                        ManageItems();
                         break;
                     case "5":
-                        ChooseItems();
+                        ManageAbilities();
                         break;
                     case "6":
-                        CreateNewPlayer();
+                        ManageRooms();
                         break;
                     case "7":
                         CheatMode();
-                        break;
-                    case "8":
-                        ManageAbilities();
-                        break;
-                    case "9":
-                        _playerRepository.DisplayAllPlayers();
                         break;
                     case "0":
                         _outputManager.WriteLine("Exiting game...", ConsoleColor.Red);
@@ -108,6 +100,10 @@ namespace ConsoleRpg.Services
                         break;
                 }
             }
+        }
+        private void LoadMonsters()
+        {
+            _goblin = _context.Monsters.OfType<Goblin>().FirstOrDefault();
         }
 
         private void SetupGame()
@@ -219,12 +215,59 @@ namespace ConsoleRpg.Services
             }
         }
 
-
-        private void LoadMonsters()
+        private void MakeAPlay()
         {
-            _goblin = _context.Monsters.OfType<Goblin>().FirstOrDefault();
+            System.Console.WriteLine("Do you want to\n1. Attack\n2.Use Ability");
+            string input = Console.ReadLine();
+
+            switch (input)
+            {
+                case "1":
+                    AttackCharacter();
+                    break;
+                case "2":
+                    UseAbility();
+                    break;
+                default:
+                    Console.WriteLine("Invalid Selection");
+                    break;
+            }
+        }
+    
+        private void AttackCharacter()
+        {
+            if (_goblin is ITargetable targetableGoblin)
+            {
+                _playerService.Attack(_player, targetableGoblin);
+            }
         }
 
+        private void UseAbility()
+        {
+            if (_goblin is ITargetable targetableGoblin)
+            {
+                _playerService.UseAbility(_player, targetableGoblin);
+            }
+        }
+
+        public void ManageItems()
+        {
+            System.Console.WriteLine("Please select an option\n\t1. Sort Items\n\t2. Choose Items");
+            string input = Console.ReadLine();
+
+            switch (input)
+            {
+                case "1":
+                    SortItems();
+                    break;
+                case "2":
+                    ChooseItems();
+                    break;
+                default:
+                    Console.WriteLine("Invalid Selection");
+                    break;
+            }
+        }
         public void SortItems()      
         {
             Console.WriteLine("\nSort Options:");
@@ -264,42 +307,27 @@ namespace ConsoleRpg.Services
             _itemRepository.AddItem("Armor", playerIdSelection);
         }
 
-        private void MakeAPlay()
+        public void ManagePlayers()
         {
-            System.Console.WriteLine("Do you want to\n1. Attack\n2.Use Ability");
+            System.Console.WriteLine("Please select an option\n\t1. Create a New Player\n\t2. Search Players\n\t3. Display All Players");
             string input = Console.ReadLine();
 
             switch (input)
             {
                 case "1":
-                    AttackCharacter();
+                    CreateNewPlayer();
                     break;
                 case "2":
-                    UseAbility();
+                    _playerRepository.SearchPlayers();
+                    break;
+                case "3":
+                    _playerRepository.DisplayAllPlayers();
                     break;
                 default:
                     Console.WriteLine("Invalid Selection");
                     break;
             }
         }
-    
-        private void AttackCharacter()
-        {
-            if (_goblin is ITargetable targetableGoblin)
-            {
-                _playerService.Attack(_player, targetableGoblin);
-            }
-        }
-
-        private void UseAbility()
-        {
-            if (_goblin is ITargetable targetableGoblin)
-            {
-                _playerService.UseAbility(_player, targetableGoblin);
-            }
-        }
-
-
 
         public void CreateNewPlayer()
         {
@@ -391,6 +419,180 @@ namespace ConsoleRpg.Services
             {
                 System.Console.WriteLine(ability.Name);
             }
+        }
+
+        public void ManageRooms()
+        {
+            System.Console.WriteLine("Please select an option:");
+            System.Console.WriteLine("\t1. Add a New Room");
+            System.Console.WriteLine("\t2. Connect Rooms");
+            System.Console.WriteLine("\t3. Display Room Details");
+
+            string input = Console.ReadLine();
+
+            switch (input)
+            {
+                case "1":
+                    AddNewRoom();
+                    break;
+                case "2":
+                    ConnectRoom();
+                    break;
+                case "3":
+                    DisplayRoomDetails();
+                    break;
+                default:
+                    System.Console.WriteLine("Invalid Selection");
+                    break;
+            }
+        }
+        public void AddNewRoom()
+        {
+            bool rewrite = true;
+
+            while (rewrite)
+            {
+                System.Console.WriteLine("Enter New Room Name: ");
+                string newRoomName = Console.ReadLine();
+                System.Console.WriteLine("Enter New Room Description: ");
+                string newRoomDescription = Console.ReadLine();
+                System.Console.WriteLine("Save this room? (Y/N)");
+                char saveRoomInput = Console.ReadLine().ToUpper()[0];
+                if (saveRoomInput == 'Y')
+                {       
+                var newRoom = new Room
+                {
+                    Name = newRoomName,
+                    Description = newRoomDescription
+                };
+
+                _roomRepository.AddRoom(newRoom);
+                rewrite = false;
+                } 
+            }
+
+        }
+
+        public void ConnectRoom()
+        {
+            System.Console.WriteLine("Let's connect two rooms!");
+            System.Console.WriteLine("What room would you like to be the start room?");
+            Room startRoom = _roomRepository.GetValidRoom();
+            System.Console.WriteLine("What room would you like to connect to?");
+            Room connectRoom = _roomRepository.GetValidRoom();
+                      
+            bool directionNotSelected = true;
+
+            while (directionNotSelected)
+            {
+                System.Console.WriteLine($"Should {connectRoom.Name} be NORTH of {startRoom.Name}? (Y/N)");
+                char northInput = Console.ReadLine().ToUpper()[0];
+                if (northInput == 'Y')
+                {
+                    System.Console.WriteLine("You chose North");
+                    bool roomTaken = _roomRepository.CheckNorthDirection(startRoom.Id);
+                    if (roomTaken)
+                    {
+                        System.Console.WriteLine($"The room {startRoom.Name} already has a room north of it.");
+                    }
+                    else
+                    {
+                        bool connectRoomTaken = _roomRepository.CheckSouthDirection(connectRoom.Id);
+                        if (connectRoomTaken)
+                        {
+                            System.Console.WriteLine($"The room {connectRoom.Name} already has a room south of it.");
+                        }
+                        else
+                        {
+                        startRoom.NorthId = connectRoom.Id;
+                        connectRoom.SouthId = startRoom.Id;
+                        _roomRepository.UpdateRoom(startRoom);
+                        _roomRepository.UpdateRoom(connectRoom);
+                        directionNotSelected = false;
+                        break;
+                        }
+                    }
+                }
+                System.Console.WriteLine($"Should {connectRoom.Name} be SOUTH of {startRoom.Name}? (Y/N)");
+                char southInput = Console.ReadLine().ToUpper()[0];
+                if (southInput == 'Y')
+                {
+                    System.Console.WriteLine("You chose South");
+                    bool roomTaken = _roomRepository.CheckSouthDirection(startRoom.Id);
+                    if (roomTaken)
+                    {
+                        System.Console.WriteLine($"The room {startRoom.Name} already has a room south of it.");
+                    }
+                    else
+                    {
+                        bool connectRoomTaken = _roomRepository.CheckNorthDirection(connectRoom.Id);
+                        if (connectRoomTaken)
+                        {
+                            System.Console.WriteLine($"The room {connectRoom.Name} already has a room north of it.");
+                        }
+                        else
+                        {
+                        startRoom.SouthId = connectRoom.Id;
+                        connectRoom.NorthId = startRoom.Id;
+
+                        }
+                    }
+                }
+                System.Console.WriteLine($"Should {connectRoom.Name} be EAST of {startRoom.Name}? (Y/N)");
+                char eastInput = Console.ReadLine().ToUpper()[0];
+                if (eastInput == 'Y')
+                {
+                    System.Console.WriteLine("You chose East");
+                    bool roomTaken = _roomRepository.CheckEastDirection(startRoom.Id);
+                    if (roomTaken)
+                    {
+                        System.Console.WriteLine($"The room {startRoom.Name} already has a room east of it.");
+                    }
+                    else
+                    {
+                        bool connectRoomTaken = _roomRepository.CheckWestDirection(connectRoom.Id);
+                        if (connectRoomTaken)
+                        {
+                            System.Console.WriteLine($"The room {connectRoom.Name} already has a room west of it.");
+                        }
+                        else
+                        {
+                        startRoom.EastId = connectRoom.Id;
+                        connectRoom.WestId = startRoom.Id;
+                        }
+                    }
+                }
+                System.Console.WriteLine($"Should {connectRoom.Name} be WEST of {startRoom.Name}? (Y/N)");
+                char westInput = Console.ReadLine().ToUpper()[0];
+                if (westInput == 'Y')
+                {
+                    System.Console.WriteLine("You chose West");
+                    bool roomTaken = _roomRepository.CheckWestDirection(startRoom.Id);
+                    if (roomTaken)
+                    {
+                        System.Console.WriteLine($"The room {startRoom.Name} already has a room west of it.");
+                    }
+                    else
+                    {
+                        bool connectRoomTaken = _roomRepository.CheckEastDirection(connectRoom.Id);
+                        if (connectRoomTaken)
+                        {
+                            System.Console.WriteLine($"The room {connectRoom.Name} already has a room east of it.");
+                        }
+                        else
+                        {
+                            System.Console.WriteLine("Valid");
+                            startRoom.WestId = connectRoom.Id;
+                            connectRoom.EastId = startRoom.Id;
+                        }
+                    }
+                }
+            }
+        }
+
+        public void DisplayRoomDetails()
+        {
+
         }
     }
 }
