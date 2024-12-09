@@ -480,114 +480,52 @@ namespace ConsoleRpg.Services
             Room startRoom = _roomRepository.GetValidRoom();
             System.Console.WriteLine("What room would you like to connect to?");
             Room connectRoom = _roomRepository.GetValidRoom();
-                      
-            bool directionNotSelected = true;
 
-            while (directionNotSelected)
+            System.Console.WriteLine($"How would you like to connect from {startRoom.Name} to {connectRoom.Name}? (North/South/East/West)");
+            char direction = Console.ReadLine().ToUpper()[0];
+
+            bool connectRooms = TryConnectRooms(startRoom, connectRoom, direction);
+
+            if (!connectRooms)
             {
-                System.Console.WriteLine($"Should {connectRoom.Name} be NORTH of {startRoom.Name}? (Y/N)");
-                char northInput = Console.ReadLine().ToUpper()[0];
-                if (northInput == 'Y')
-                {
-                    System.Console.WriteLine("You chose North");
-                    bool roomTaken = _roomRepository.CheckNorthDirection(startRoom.Id);
-                    if (roomTaken)
-                    {
-                        System.Console.WriteLine($"The room {startRoom.Name} already has a room north of it.");
-                    }
-                    else
-                    {
-                        bool connectRoomTaken = _roomRepository.CheckSouthDirection(connectRoom.Id);
-                        if (connectRoomTaken)
-                        {
-                            System.Console.WriteLine($"The room {connectRoom.Name} already has a room south of it.");
-                        }
-                        else
-                        {
-                        startRoom.NorthId = connectRoom.Id;
-                        connectRoom.SouthId = startRoom.Id;
-                        _roomRepository.UpdateRoom(startRoom);
-                        _roomRepository.UpdateRoom(connectRoom);
-                        directionNotSelected = false;
-                        break;
-                        }
-                    }
-                }
-                System.Console.WriteLine($"Should {connectRoom.Name} be SOUTH of {startRoom.Name}? (Y/N)");
-                char southInput = Console.ReadLine().ToUpper()[0];
-                if (southInput == 'Y')
-                {
-                    System.Console.WriteLine("You chose South");
-                    bool roomTaken = _roomRepository.CheckSouthDirection(startRoom.Id);
-                    if (roomTaken)
-                    {
-                        System.Console.WriteLine($"The room {startRoom.Name} already has a room south of it.");
-                    }
-                    else
-                    {
-                        bool connectRoomTaken = _roomRepository.CheckNorthDirection(connectRoom.Id);
-                        if (connectRoomTaken)
-                        {
-                            System.Console.WriteLine($"The room {connectRoom.Name} already has a room north of it.");
-                        }
-                        else
-                        {
-                        startRoom.SouthId = connectRoom.Id;
-                        connectRoom.NorthId = startRoom.Id;
+                System.Console.WriteLine($"{startRoom.Name} and {connectRoom.Name} cannot be connected.");
+            }
 
-                        }
-                    }
-                }
-                System.Console.WriteLine($"Should {connectRoom.Name} be EAST of {startRoom.Name}? (Y/N)");
-                char eastInput = Console.ReadLine().ToUpper()[0];
-                if (eastInput == 'Y')
-                {
-                    System.Console.WriteLine("You chose East");
-                    bool roomTaken = _roomRepository.CheckEastDirection(startRoom.Id);
-                    if (roomTaken)
-                    {
-                        System.Console.WriteLine($"The room {startRoom.Name} already has a room east of it.");
-                    }
-                    else
-                    {
-                        bool connectRoomTaken = _roomRepository.CheckWestDirection(connectRoom.Id);
-                        if (connectRoomTaken)
-                        {
-                            System.Console.WriteLine($"The room {connectRoom.Name} already has a room west of it.");
-                        }
-                        else
-                        {
+        }
+     
+        private bool TryConnectRooms(Room startRoom, Room connectRoom, char direction)
+        {
+            switch (direction)
+            {
+                case 'N':
+                    if (_roomRepository.CheckNorthDirection(startRoom.Id) || _roomRepository.CheckSouthDirection(connectRoom.Id))
+                        return false;
+                    startRoom.NorthId = connectRoom.Id;
+                    connectRoom.SouthId = startRoom.Id;
+                    break;
+                case 'S':
+                    if (_roomRepository.CheckSouthDirection(startRoom.Id) || _roomRepository.CheckNorthDirection(connectRoom.Id))
+                        return false;
+                    startRoom.SouthId = connectRoom.Id;
+                    connectRoom.NorthId = startRoom.Id;
+                    break;
+                case 'E':
+                    if (_roomRepository.CheckEastDirection(startRoom.Id) || _roomRepository.CheckWestDirection(connectRoom.Id))
+                            return false;
                         startRoom.EastId = connectRoom.Id;
                         connectRoom.WestId = startRoom.Id;
-                        }
-                    }
-                }
-                System.Console.WriteLine($"Should {connectRoom.Name} be WEST of {startRoom.Name}? (Y/N)");
-                char westInput = Console.ReadLine().ToUpper()[0];
-                if (westInput == 'Y')
-                {
-                    System.Console.WriteLine("You chose West");
-                    bool roomTaken = _roomRepository.CheckWestDirection(startRoom.Id);
-                    if (roomTaken)
-                    {
-                        System.Console.WriteLine($"The room {startRoom.Name} already has a room west of it.");
-                    }
-                    else
-                    {
-                        bool connectRoomTaken = _roomRepository.CheckEastDirection(connectRoom.Id);
-                        if (connectRoomTaken)
-                        {
-                            System.Console.WriteLine($"The room {connectRoom.Name} already has a room east of it.");
-                        }
-                        else
-                        {
-                            System.Console.WriteLine("Valid");
-                            startRoom.WestId = connectRoom.Id;
-                            connectRoom.EastId = startRoom.Id;
-                        }
-                    }
-                }
+                        break;
+                case 'W':
+                    if (_roomRepository.CheckWestDirection(startRoom.Id) || _roomRepository.CheckEastDirection(connectRoom.Id))
+                            return false;
+                        startRoom.WestId = connectRoom.Id;
+                        connectRoom.EastId = startRoom.Id;
+                        break;
+                
             }
+            _roomRepository.UpdateRoom(startRoom);
+            _roomRepository.UpdateRoom(connectRoom);
+            return true;
         }
 
         public void DisplayRoomDetails()
