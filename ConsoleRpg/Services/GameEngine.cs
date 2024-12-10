@@ -94,9 +94,6 @@ namespace ConsoleRpg.Services
                     case "7":
                         CheatMode();
                         break;
-                    case "8":
-                    RoomDetails();
-                        break;
                     case "0":
                         _outputManager.WriteLine("Exiting game...", ConsoleColor.Red);
                         _outputManager.Display();
