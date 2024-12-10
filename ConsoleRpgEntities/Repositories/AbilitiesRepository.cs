@@ -20,8 +20,6 @@ namespace ConsoleRpgEntities.Repositories
             _playerRepository = playerRepository;
         }
 
-        // CREATE
-
         // READ
 
         public void DisplayAbilities()
@@ -85,12 +83,13 @@ namespace ConsoleRpgEntities.Repositories
         }
 
 
-        // UPDATE
+        // CREATE
 
         public void AddPlayerAbilities(Player player, Ability ability)
         {
             player.Abilities.Add(ability);
             _context.SaveChanges();
+            System.Console.WriteLine($"Added Ability {ability.Name} for player {player.Name}");
         }
 
         // DELETE

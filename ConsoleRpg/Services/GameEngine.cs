@@ -21,13 +21,16 @@ namespace ConsoleRpg.Services
         private readonly PlayerRepository _playerRepository;
         private readonly AbilitiesRepository _abilitiesRepository;
         private readonly RoomRepository _roomRepository;
+        private readonly MonsterRepository _monsterRepository;
         private readonly PlayerService _playerService;
 
         private Player _player;
-        private IMonster _goblin;
+        private Monster _goblin;
+        private Monster _vampire;
+        private Monster _wizard;
 
         public GameEngine(GameContext context, MenuManager menuManager, OutputManager outputManager, ItemRepository itemRepository, 
-        PlayerRepository playerRepository, AbilitiesRepository abilitiesRepository, RoomRepository roomRepository, PlayerService playerService)
+        PlayerRepository playerRepository, AbilitiesRepository abilitiesRepository, RoomRepository roomRepository, MonsterRepository monsterRepository, PlayerService playerService)
         {
             _menuManager = menuManager;
             _outputManager = outputManager;
@@ -36,6 +39,7 @@ namespace ConsoleRpg.Services
             _playerRepository = playerRepository;
             _abilitiesRepository = abilitiesRepository;
             _roomRepository = roomRepository;
+            _monsterRepository = monsterRepository;
             _playerService = playerService;
         }
 
@@ -90,6 +94,9 @@ namespace ConsoleRpg.Services
                     case "7":
                         CheatMode();
                         break;
+                    case "8":
+                    RoomDetails();
+                        break;
                     case "0":
                         _outputManager.WriteLine("Exiting game...", ConsoleColor.Red);
                         _outputManager.Display();
@@ -101,9 +108,36 @@ namespace ConsoleRpg.Services
                 }
             }
         }
+
+       
+        private int NextRandomRoom()
+        {
+            Random rnd = new Random();
+            int roomCount = _roomRepository.GetRoomCount();
+            int randRoomInt = rnd.Next(0, roomCount);
+            return randRoomInt;
+        }
+
         private void LoadMonsters()
         {
+            int randomRoomInt;
+    
             _goblin = _context.Monsters.OfType<Goblin>().FirstOrDefault();
+            randomRoomInt = NextRandomRoom();
+            _goblin.RoomId = randomRoomInt;
+            _monsterRepository.UpdateMonster(_goblin);
+
+            _vampire = _context.Monsters.OfType<Vampire>().FirstOrDefault();
+            randomRoomInt = NextRandomRoom();
+            _vampire.RoomId = randomRoomInt;
+            _monsterRepository.UpdateMonster(_vampire);
+
+            _wizard = _context.Monsters.OfType<Wizard>().FirstOrDefault();
+            randomRoomInt = NextRandomRoom();
+            _wizard.RoomId = randomRoomInt;
+            _monsterRepository.UpdateMonster(_wizard);
+
+
         }
 
         private void SetupGame()
@@ -116,8 +150,31 @@ namespace ConsoleRpg.Services
             LoadMonsters();
 
             // Pause before starting the game loop
-            Thread.Sleep(500);
+            Thread.Sleep(100);
             GameLoop();
+        }
+
+        private string? MonsterRoomString(int roomId)
+        {
+            var monsterNames = new List<string>();
+                var monsterList = _roomRepository.GetMonstersInASingleRoom(roomId);
+
+                if (monsterList.Any())
+                {
+                    foreach (var monster in monsterList)
+                    {
+                        monsterNames.Add(monster.Name);
+                    }
+
+                        string stringOfNames = String.Join(',', monsterNames);
+                        return stringOfNames;
+                }
+                else
+                {
+                    return null;
+                }
+
+                
         }
 
         private void PlayerMove()
@@ -131,6 +188,14 @@ namespace ConsoleRpg.Services
 
                 var currentRoom = _roomRepository.GetRoomById(playerCurrentRoomId);
                 System.Console.WriteLine($"Player is currently in room {currentRoom.Name}");
+                
+                string monstersInRoom = MonsterRoomString(playerCurrentRoomId);
+
+                if (monstersInRoom is not null)
+                {
+                    System.Console.WriteLine($"Monsters Also In Room: {monstersInRoom}");
+                }
+                
 
                 bool notValid = true;
                 while (notValid)
@@ -532,9 +597,30 @@ namespace ConsoleRpg.Services
             return true;
         }
 
+        public void RoomDetails()
+        {
+           var query = from r in _context.Room
+                join m in _context.Monsters on r.Id equals m.RoomId into roomMonster
+                from m in roomMonster.DefaultIfEmpty()
+                select new { room = r, monster = m };
+
+            foreach (var room in query)
+            {
+                if (room.monster != null)
+                {
+                    System.Console.WriteLine($"{room.room.Id}. {room.room.Name}\t{room.monster.Name}");
+                }
+                else
+                {
+                    System.Console.WriteLine($"{room.room.Id}. {room.room.Name}\tNo Monsters");
+                }
+                
+            }
+        }
+
         public void DisplayRoomDetails()
         {
-
+            RoomDetails();
         }
     }
 }

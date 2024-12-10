@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using ConsoleRpgEntities.Models.Abilities.PlayerAbilities;
 using ConsoleRpgEntities.Models.Characters;
 using ConsoleRpgEntities.Models.Rooms;
+using System.Diagnostics.Metrics;
+using ConsoleRpgEntities.Models.Characters.Monsters;
 
 namespace ConsoleRpgEntities.Repositories
 {
@@ -24,6 +26,7 @@ namespace ConsoleRpgEntities.Repositories
         {
             _context.Room.Add(room);
             _context.SaveChanges();
+            System.Console.WriteLine($"Created a new room called {room.Name}");
         }
         
         // READ
@@ -170,6 +173,35 @@ namespace ConsoleRpgEntities.Repositories
             }
 
             return null;
+        }
+
+        public int GetRoomCount()
+        {
+            int counter = 0;
+
+            var allRooms = _context.Room.ToList();
+
+            foreach (var a_room in allRooms)
+            {
+                counter += 1;
+            }
+
+            return counter;
+        }
+
+        public IQueryable<Monster> GetMonstersInRooms()
+        {
+            var monsters = _context.Room
+            .SelectMany(room => room.Monsters);
+
+            return monsters;
+        }
+
+        public List<Monster> GetMonstersInASingleRoom(int _roomId)
+        {
+            var monsterQueryable = GetMonstersInRooms();
+            var monsters = monsterQueryable.Where(i=>i.RoomId == _roomId).ToList();
+            return monsters;
         }
 
         // Update

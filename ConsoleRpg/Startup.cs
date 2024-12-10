@@ -3,6 +3,7 @@ using ConsoleRpg.Helpers;
 using ConsoleRpg.Services;
 using ConsoleRpgEntities.Data;
 using ConsoleRpgEntities.Helpers;
+using ConsoleRpgEntities.Models.Characters.Monsters;
 using ConsoleRpgEntities.Repositories;
 using ConsoleRpgEntities.Services;
 using Microsoft.EntityFrameworkCore;
@@ -55,6 +56,7 @@ namespace ConsoleRpg
             services.AddTransient<PlayerRepository>();
             services.AddTransient<AbilitiesRepository>();
             services.AddTransient<RoomRepository>();
+            services.AddTransient<MonsterRepository>();
             services.AddTransient<PlayerService>();
         }
     }
