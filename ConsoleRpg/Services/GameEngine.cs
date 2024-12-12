@@ -698,6 +698,7 @@ namespace ConsoleRpg.Services
             }
             _roomRepository.UpdateRoom(startRoom);
             _roomRepository.UpdateRoom(connectRoom);
+            System.Console.WriteLine($"{startRoom.Name} and {connectRoom.Name} Connected!");
             return true;
         }
 
