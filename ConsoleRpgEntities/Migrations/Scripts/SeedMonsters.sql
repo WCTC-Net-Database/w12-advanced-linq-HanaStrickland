@@ -50,4 +50,8 @@ VALUES
 ('Cackle Goblin', 170, 27, 'Goblin', 15, NULL, NULL, 1),
 ('Fiona Vampire', 305, 31, 'Vampire', NULL, NULL, 22, 1),
 ('Nolan Wizard', 200, 12, 'Wizard', NULL, 20, NULL, 1),
-('Twitch Goblin', 135, 20, 'Goblin', 7, NULL, NULL, 1)
+('Twitch Goblin', 135, 20, 'Goblin', 7, NULL, NULL, 1);
+
+UPDATE Monsters
+SET IsActive = 1
+WHERE Id = 1; -- Make Bob Goblin Active if not already

@@ -29,6 +29,10 @@ namespace ConsoleRpg.Services
         private Monster _vampire;
         private Monster _wizard;
 
+        private int _goblinSkip;
+        private int _vampireSkip;
+        private int _wizardSkip;
+
         public GameEngine(GameContext context, MenuManager menuManager, OutputManager outputManager, ItemRepository itemRepository, 
         PlayerRepository playerRepository, AbilitiesRepository abilitiesRepository, RoomRepository roomRepository, MonsterRepository monsterRepository, PlayerService playerService)
         {
@@ -41,6 +45,10 @@ namespace ConsoleRpg.Services
             _roomRepository = roomRepository;
             _monsterRepository = monsterRepository;
             _playerService = playerService;
+            
+            _goblinSkip = 0;
+            _vampireSkip = 0;
+            _wizardSkip = 0;
         }
 
         public void Run()
@@ -113,26 +121,36 @@ namespace ConsoleRpg.Services
             return randRoomInt;
         }
 
-        private void LoadMonsters()
+        private void LoadGoblin()
         {
-            int randomRoomInt;
-    
-            _goblin = _context.Monsters.OfType<Goblin>().FirstOrDefault();
-            randomRoomInt = NextRandomRoom();
+            _goblin = _context.Monsters.OfType<Goblin>().Skip(_goblinSkip).FirstOrDefault();
+            int randomRoomInt = NextRandomRoom();
             _goblin.RoomId = randomRoomInt;
             _monsterRepository.UpdateMonster(_goblin);
-
-            _vampire = _context.Monsters.OfType<Vampire>().FirstOrDefault();
-            randomRoomInt = NextRandomRoom();
+            _goblinSkip += 1;
+        }
+        private void LoadVampire()
+        {
+            _vampire = _context.Monsters.OfType<Vampire>().Skip(_vampireSkip).FirstOrDefault();
+            int randomRoomInt = NextRandomRoom();
             _vampire.RoomId = randomRoomInt;
             _monsterRepository.UpdateMonster(_vampire);
-
-            _wizard = _context.Monsters.OfType<Wizard>().FirstOrDefault();
-            randomRoomInt = NextRandomRoom();
+            _vampireSkip +=1;
+        }
+        private void LoadWizard()
+        {
+            _wizard = _context.Monsters.OfType<Wizard>().Skip(_wizardSkip).FirstOrDefault();
+            int randomRoomInt = NextRandomRoom();
             _wizard.RoomId = randomRoomInt;
             _monsterRepository.UpdateMonster(_wizard);
-
-
+            _wizardSkip +=1;
+        }
+        
+        private void LoadMonsters()
+        {
+            LoadGoblin();
+            LoadVampire();
+            LoadWizard();
         }
 
         private void SetupGame()
@@ -358,6 +376,23 @@ namespace ConsoleRpg.Services
                 if (attackMonster is ITargetable targetableMonster)
                 {
                     _playerService.Attack(_player, targetableMonster);
+
+                    int randomRoomInt;
+
+                    if (attackMonster is Goblin)
+                    {
+                        LoadGoblin();
+                    }
+
+                    if (attackMonster is Vampire)
+                    {
+                        LoadVampire();
+                    }
+
+                    if (attackMonster is Wizard)
+                    {
+                        LoadWizard();
+                    }
                 }
             }
         }
