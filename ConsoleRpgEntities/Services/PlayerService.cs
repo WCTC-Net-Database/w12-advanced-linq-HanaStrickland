@@ -56,7 +56,15 @@ namespace ConsoleRpgEntities.Services
                 var ability = player.Abilities.FirstOrDefault();
 
                 ability.Activate(player, target);
-                _abilitiesRepository.RemovePlayerAbilities(player, ability);                
+                var damage = ability.Damage;
+                _abilitiesRepository.RemovePlayerAbilities(player, ability);
+                target.Health -= damage;
+
+                if (target is Monster monster)
+
+                {
+                    _monsterRepository.UpdateMonster(monster);
+                }
             }
             else
             {
