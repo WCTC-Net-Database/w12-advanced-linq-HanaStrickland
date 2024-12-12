@@ -41,16 +41,14 @@ namespace ConsoleRpgEntities.Repositories
             // Else assume it's the Name
             if (int.TryParse(search, out int result))
             {
-                System.Console.WriteLine("Let's Search by ID");
                 Ability ability = _context.Abilities.Where(a => a.Id == result).FirstOrDefault();
                 return ability;
             }
             else
             {
-                System.Console.WriteLine("Let's Search by Name");
                 Ability ability = _context.Abilities
                     .ToList()
-                    .FirstOrDefault(p => p.Name.Equals(search, StringComparison.Ordinal));
+                    .FirstOrDefault(p => p.Name.Equals(search, StringComparison.OrdinalIgnoreCase));
                 return ability;
 
             }

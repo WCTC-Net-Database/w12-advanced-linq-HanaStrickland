@@ -15,6 +15,11 @@ namespace ConsoleRpgEntities.Repositories
         // CREATE
 
         // READ
+        public Monster GetMonster(int id)
+        {
+            var monster = _context.Monsters.Where(m => m.Id == id).FirstOrDefault();
+            return monster;
+        }
 
         // UPDATE
         public void UpdateMonster(Monster monster)

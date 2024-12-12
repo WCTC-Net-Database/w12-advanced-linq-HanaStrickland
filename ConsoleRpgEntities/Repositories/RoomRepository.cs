@@ -135,16 +135,14 @@ namespace ConsoleRpgEntities.Repositories
             // Else assume it's the Name
             if (int.TryParse(search, out int result))
             {
-                System.Console.WriteLine("Let's Search by ID");
                 Room room = _context.Room.Where(p => p.Id == result).FirstOrDefault();
                 return room;
             }
             else
             {
-                System.Console.WriteLine("Let's Search by Name");
                 Room room = _context.Room
                     .ToList()
-                    .FirstOrDefault(p => p.Name.Equals(search, StringComparison.Ordinal));
+                    .FirstOrDefault(p => p.Name.Equals(search, StringComparison.OrdinalIgnoreCase));
                 return room;
 
             }
@@ -204,11 +202,18 @@ namespace ConsoleRpgEntities.Repositories
             return monsters;
         }
 
+        public Monster CheckMonsterInRoom(int monsterId, int roomId)
+        {
+            var monsterQueryable = GetMonstersInRooms();
+            var singleMonster = monsterQueryable.Where(i=>i.RoomId == roomId && i.Id == monsterId).FirstOrDefault();
+            return singleMonster;
+        }
+
         // Update
         public void UpdateRoom(Room room)
         {
             _context.Room.Update(room);
             _context.SaveChanges();
-        }
+        }        
     }
 }

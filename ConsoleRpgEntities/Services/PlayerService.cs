@@ -11,11 +11,13 @@ namespace ConsoleRpgEntities.Services
     {
         private readonly ItemRepository _itemRepository;
         private readonly AbilitiesRepository _abilitiesRepository;
+        private readonly MonsterRepository _monsterRepository;
 
-        public PlayerService(ItemRepository itemRepository, AbilitiesRepository abilitiesRepository)
+        public PlayerService(ItemRepository itemRepository, AbilitiesRepository abilitiesRepository, MonsterRepository monsterRepository)
         {
             _itemRepository = itemRepository;
             _abilitiesRepository = abilitiesRepository;
+            _monsterRepository = monsterRepository;
         }
         public void Attack(Player player, ITargetable target)
         {
@@ -33,6 +35,8 @@ namespace ConsoleRpgEntities.Services
 
                     attackItem.PlayerId = null;
                     _itemRepository.UpdateItem(attackItem);
+                    monster.RoomId = null;
+                    _monsterRepository.UpdateMonster(monster);
                 } 
                 else
                 {
@@ -45,7 +49,7 @@ namespace ConsoleRpgEntities.Services
             }
         }
 
-         public void UseAbility(Player player, ITargetable target)
+         public void UseAbility(Player player, ITargetable target) // TODO: Execute Ability in an Attack
         {
             if (player.Abilities.Any())
             {

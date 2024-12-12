@@ -18,6 +18,7 @@ namespace ConsoleRpgEntities.Repositories
         }
 
         // CREATE
+        // TODO: Add New Player to DB
         public void AddPlayer(Player player)
         {
             _context.Players.Add(player);
@@ -78,16 +79,14 @@ namespace ConsoleRpgEntities.Repositories
             // Else assume it's the Name
             if (int.TryParse(search, out int result))
             {
-                System.Console.WriteLine("Let's Search by ID");
                 Player player = _context.Players.Where(p => p.Id == result).FirstOrDefault();
                 return player;
             }
             else
             {
-                System.Console.WriteLine("Let's Search by Name");
                 Player player = _context.Players
                     .ToList()
-                    .FirstOrDefault(p => p.Name.Equals(search, StringComparison.Ordinal));
+                    .FirstOrDefault(p => p.Name.Equals(search, StringComparison.OrdinalIgnoreCase));
                 return player;
 
             }
@@ -133,12 +132,14 @@ namespace ConsoleRpgEntities.Repositories
             _context.SaveChanges();
         }
 
+        // TODO: Allow user to update experience points
         public void IncreasePlayerExperiencePoints(Player player)
         {
             player.Experience += 5;
             UpdatePlayer(player);
         }
 
+        // TODO: Allow user to update health points
         public void IncreasePlayerHealthPoints(Player player)
         {
             player.Health += 5;

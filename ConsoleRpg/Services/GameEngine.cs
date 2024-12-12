@@ -105,8 +105,6 @@ namespace ConsoleRpg.Services
                 }
             }
         }
-
-       
         private int NextRandomRoom()
         {
             Random rnd = new Random();
@@ -151,27 +149,50 @@ namespace ConsoleRpg.Services
             GameLoop();
         }
 
+        private List<Monster> GetMonsterList(int id)
+        {
+            var monsterList = _roomRepository.GetMonstersInASingleRoom(id);
+            return monsterList;
+        }
+
+        private bool MonstersInCurrentRoomOptions(int roomId)
+        {
+            var monsterList = GetMonsterList(roomId);
+            if (monsterList.Any())
+            {
+                foreach (var monster in monsterList)
+                {
+                    System.Console.WriteLine($"{monster.Id}. {monster.Name}");
+                }
+                return true;
+            }
+            else
+            {
+                System.Console.WriteLine("No Monster Options");
+                return false;
+            }
+        }
+
+
         private string? MonsterRoomString(int roomId)
         {
             var monsterNames = new List<string>();
-                var monsterList = _roomRepository.GetMonstersInASingleRoom(roomId);
+            var monsterList = GetMonsterList(roomId);
 
-                if (monsterList.Any())
+            if (monsterList.Any())
+            {
+                foreach (var monster in monsterList)
                 {
-                    foreach (var monster in monsterList)
-                    {
-                        monsterNames.Add(monster.Name);
-                    }
-
-                        string stringOfNames = String.Join(',', monsterNames);
-                        return stringOfNames;
-                }
-                else
-                {
-                    return null;
+                    monsterNames.Add(monster.Name);
                 }
 
-                
+                    string stringOfNames = String.Join(',', monsterNames);
+                    return stringOfNames;
+            }
+            else
+            {
+                return null;
+            }                
         }
 
         private void PlayerMove()
@@ -185,7 +206,7 @@ namespace ConsoleRpg.Services
 
                 var currentRoom = _roomRepository.GetRoomById(playerCurrentRoomId);
                 System.Console.WriteLine($"Player is currently in room {currentRoom.Name}");
-                
+                // TODO: List Characters in Room
                 string monstersInRoom = MonsterRoomString(playerCurrentRoomId);
 
                 if (monstersInRoom is not null)
@@ -300,25 +321,67 @@ namespace ConsoleRpg.Services
             }
         }
     
+        
+        private Monster ElligibleMonster()
+        {
+            
+            int playerCurrentRoomId = _playerRepository.GetPlayerCurrentRoomId(_player);
+            bool monstersExistInCurrentRoom = MonstersInCurrentRoomOptions(playerCurrentRoomId);
+            
+            if (monstersExistInCurrentRoom)
+            {
+                System.Console.WriteLine("Select a monster to target.");
+                while (true)
+
+                {
+                    int monsterChoice = Convert.ToInt16(Console.ReadLine());
+                    Monster singleMonster = _roomRepository.CheckMonsterInRoom(monsterChoice, playerCurrentRoomId);
+
+                    if (singleMonster != null)
+                    {
+                        return singleMonster;
+                    }
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         private void AttackCharacter()
         {
-            if (_goblin is ITargetable targetableGoblin)
+            var attackMonster = ElligibleMonster();
+
+            if (attackMonster != null)
             {
-                _playerService.Attack(_player, targetableGoblin);
+                if (attackMonster is ITargetable targetableMonster)
+                {
+                    _playerService.Attack(_player, targetableMonster);
+                }
             }
         }
 
         private void UseAbility()
         {
-            if (_goblin is ITargetable targetableGoblin)
+            var attackMonster = ElligibleMonster();
+
+            if (attackMonster != null)
             {
-                _playerService.UseAbility(_player, targetableGoblin);
+                if (attackMonster is ITargetable targetableMonster)
+                {
+                    _playerService.UseAbility(_player, targetableMonster);
+                }
             }
         }
 
         public void ManageItems()
         {
-            System.Console.WriteLine("Please select an option\n\t1. Sort Items\n\t2. Choose Items");
+            System.Console.WriteLine("Please select an option");
+            Console.WriteLine("1. Sort Items");
+            Console.WriteLine("2. Choose Items");
+            Console.WriteLine("3. Locate an Item"); // TODO: Find a specific piece of a equipment and list the associated character and location
+            Console.WriteLine("4. List Player Items");
             string input = Console.ReadLine();
 
             switch (input)
@@ -328,6 +391,14 @@ namespace ConsoleRpg.Services
                     break;
                 case "2":
                     ChooseItems();
+                    break;
+                case "3":
+                    Console.WriteLine("Pick an Item to Locate");
+                    _itemRepository.LocateItem();
+                    Thread.Sleep(500);
+                    break;
+                case "4":
+                    _itemRepository.PlayerItems(_player.Id);
                     break;
                 default:
                     Console.WriteLine("Invalid Selection");
@@ -384,10 +455,10 @@ namespace ConsoleRpg.Services
                     CreateNewPlayer();
                     break;
                 case "2":
-                    _playerRepository.SearchPlayers();
+                    _playerRepository.SearchPlayers(); // TODO: Search for a specific character ignoring upper/lower case
                     break;
                 case "3":
-                    _playerRepository.DisplayAllPlayers();
+                    _playerRepository.DisplayAllPlayers(); // TODO: Display All Characters
                     break;
                 default:
                     Console.WriteLine("Invalid Selection");
@@ -395,6 +466,7 @@ namespace ConsoleRpg.Services
             }
         }
 
+        // TODO: Add a New Character
         public void CreateNewPlayer()
         {
             Console.WriteLine("Enter player NAME: ");
@@ -411,7 +483,7 @@ namespace ConsoleRpg.Services
         
         }
 
-
+        // TODO: Edit an Existing Character
         public void CheatMode()
         {
 
@@ -450,10 +522,10 @@ namespace ConsoleRpg.Services
             switch (input)
             {
                 case "1":
-                    AddAbilityToPlayer();
+                    AddAbilityToPlayer(); // TODO: Add Abilities to Player
                     break;
                 case "2":
-                    DisplayPlayerAbilities();
+                    DisplayPlayerAbilities(); // TODO: Display Player Abilities
                     break;
                 default:
                     System.Console.WriteLine("Invalid Selection");
@@ -499,13 +571,13 @@ namespace ConsoleRpg.Services
             switch (input)
             {
                 case "1":
-                    AddNewRoom();
+                    AddNewRoom(); // TODO: Add new Room
                     break;
                 case "2":
-                    ConnectRoom();
+                    ConnectRoom(); // TODO: Navigate Rooms
                     break;
                 case "3":
-                    DisplayRoomDetails();
+                    DisplayRoomDetails(); // TODO: Display ROOM Details
                     break;
                 default:
                     System.Console.WriteLine("Invalid Selection");
